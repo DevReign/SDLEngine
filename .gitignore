@@ -1,0 +1,9 @@
+# Ignore a specific file i.e secrets.json
+
+# Ignore folders
+.vs/
+x64/
+SDLEngine/
+
+# Ignore all files with a specific extension
+*.dll

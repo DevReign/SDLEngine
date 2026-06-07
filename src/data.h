@@ -1,0 +1,70 @@
+#ifndef DATA_H
+#define DATA_H
+#include <stdbool.h>
+#include "image.h"
+#include "audio.h"
+#include "vector.h"
+
+// Texture slot mappings for the Image module
+typedef enum {
+    TEX_WORLD = 0,
+    TEX_OBJECTS,
+    TEX_GUI,
+    TEX_COUNT
+} TilesheetID;
+
+// Sound effect indices
+typedef enum {
+    SND_HIT = 0,
+    SND_COUNT
+} SoundID;
+
+// Blueprint database indices
+typedef enum {
+    ENT_DUMMY = 0,
+    ENT_PLAYER,
+    ENT_ZOMBIE,
+    ENT_COUNT
+} EntityID;
+
+// Core behavioral
+typedef enum {
+    TYPE_STATIC = 0, // No logic
+    TYPE_CREATURE,   // Actively moves, takes damage, tracks health
+    TYPE_PROJECTILE, 
+    TYPE_EFFECT,     // Visual-only
+    TYPE_COUNT
+} EntityType;
+
+// AI Routine indices
+typedef enum {
+    AI_NONE = 0,
+    AI_CHASE_PLAYER,
+    AI_RANDOM_WANDER
+} AiType;
+
+// Immutable Data Blueprint (The Flyweight Pattern)
+typedef struct EntityBlueprint{
+    unsigned char type, //player, creature, projectile, decoration, etc... 
+        maxHealth,
+        damage,			// damage done on touch
+        speed,			// movement speed
+        attackSpeed,	// time between being able to attack
+        ai,				// Ai this entity has, if any. 
+        width,			//size for collision. maybe in 8x8 tiles instead of pixels?
+        height,
+        touchDamage;
+		//originX,		// everything will have center origin, so not needed? 
+		//originY,
+		//interactable,	// if this can be activated, not needed if interactable type?
+	bool rotateSprite;	// bool: Should the sprite rotate based on the entity direction? 
+	unsigned short projectileId, //if the ai tries to spawn a projectile it'll use this 
+		frameStart,		// base frame/idle frame
+		frameAttack,	// one frame that'll show after attacking
+		frameOffset,	// optional -> can offset all frames to be something else or fix position on tilesheet
+		numFrames;      // number of frames to cycle through from idle to show walking or play an idle animation
+    float animRate;     // Time interval between animation steps
+};
+
+void DatabaseLoadAssets(void);
+#endif
