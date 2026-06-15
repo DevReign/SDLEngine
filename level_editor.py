@@ -1,30 +1,34 @@
-import pygame, os, struct, math, sys, random;
+import pygame, os, math, sys, random;
+import numpy as np
 from pygame.locals import *
+from pathlib import Path
 
-# Master Atlas Coordinate Mapping
 ATLAS_CONFIG = {
-    "ui":      {"start_row": 0,  "tile_size": 8},   # Fonts, UI elements
-    "world":   {"start_row": 8,  "tile_size": 16},  # Environment tiles
-    "objects": {"start_row": 40, "tile_size": 16},  # Chests, doors, entities
-    "effects": {"start_row": 56, "tile_size": 16}   # Particles, animations
+    "world":      {"start_row": 0,  "tile_size": 8},
+    "objects":   {"start_row": 8,  "tile_size": 16},
 }
 
 MAP_WIDTH = 15
 MAP_HEIGHT = 9
 TOTAL_TILES = MAP_WIDTH * MAP_HEIGHT
+# Level editor layers
+LAYER_TILE = 0
+LAYER_OBJECT = 1
 
-original_map_data = [i + 1000 for i in range(TOTAL_TILES)]
+# TODO - Move these functions later
+def IsPointInRect(point, rect):
+    """
+    Checks if a point (x, y) is inside a rectangle.
+    rect format: (min_x, min_y, max_x, max_y)
+    """
+    x, y = point
+    min_x, min_y, max_x, max_y = rect
+    return min_x <= x <= max_x and min_y <= y <= max_y # Change '<=' to '<' if you want to exclude the borders
 
 def RoundToNearest(i, j):
     return i & ~(j-1)
 
-def CreateArray(size, val):
-    a = []
-    for i in range(0,size):
-        a.append(val)
-    return a
-
-def load_tilesheet(path, tile_size):
+def LoadTilesheet(path, tile_size):
     try:
         sheet = pygame.image.load(path).convert_alpha()
     except pygame.error:
@@ -40,7 +44,7 @@ def load_tilesheet(path, tile_size):
             tiles.append(sheet.subsurface(rect))
     return tiles
 
-def draw_tile(surface, tiles, tile_index, position):
+def DrawTile(surface, tiles, tile_index, position):
     if 0 <= tile_index < len(tiles):
         surface.blit(tiles[tile_index], position)
 
@@ -49,50 +53,190 @@ class Window(object):
         pygame.init()
         self.width = w
         self.height = h
-        self.scale = 2
+        self.scale = 4
         self.title = title
         self.size = (w, h)
         self.window = pygame.display.set_mode(self.size)
-        self.buffer = pygame.Surface((w/2,h/2))
+        self.surface = pygame.Surface((w/self.scale,h/self.scale))
         self.deltatime = 0.0;
-    def GetBuffer(self):
-        return self.buffer
+    def GetSurface(self):
+        return self.surface
     def DrawTile(self, tiles, tile_index, position):
         if 0 <= tile_index < len(tiles):
-            self.buffer.blit(tiles[tile_index], position)
+            self.surface.blit(tiles[tile_index], position)
+    def Draw(self, img, pos=(0,0)):
+        self.window.blit(img, pos)
+    def Scale(self):
+        pygame.transform.scale(self.surface,self.size,self.window) 
     def Update(self):
-        pygame.transform.scale(self.buffer,self.size,self.window)    
         pygame.display.flip()
     def Clear(self):
-        self.buffer.fill((0,0,0))
-
-class Room:
-    def __init__(self, width=15, height=9):
-        self.width = width
-        self.height = height
-        # 2D array for tiles, list for entity positions
-        self.tiles = [[0 for _ in range(width)] for _ in range(height)]
-        self.entities = [] 
+        self.surface.fill((0,0,0))
 
 class Level:
-    def __init__(self, grid_width=8, grid_height=8):
-        self.grid_width = grid_width
-        self.grid_height = grid_height
-        self.current_level_id = 0
-        #self.rooms = [[Room() for _ in range(grid_width)] for _ in range(grid_height)]
-        self.tiles = []
-        self.entities = []
+    def __init__(self):
+        self.width = 8
+        self.height = 8
+        self.size = self.width* self.height 
+        self.currentLevel = 0
+        self.chunkId = 0
+        self.chunkWidth = 15
+        self.chunkHeight = 9
+        self.chunkSize = self.chunkWidth * self.chunkHeight
+        self.tile_size = 16
+        self.tiles = np.full((self.size*self.chunkSize),5, dtype=np.int32)
+        self.entities = np.zeros((self.size*self.chunkSize), dtype=np.int32)
+        self.chunkTiles = self.tiles[0 : self.chunkSize]
+        self.chunkObjects = self.entities[0 : self.chunkSize]
+        self.file_path = Path("0.bin")
+        if self.file_path.is_file():
+            print("The file exists.")
+            self.Load('0.bin')
+        else:
+            print("The file does not exist.")
 
-    def save_map(filename, map_data):
-        # 'H' is 2 bytes. We need to repeat it for every tile in the map.
-        # For a 15x9 map, this creates the format string: "=135H"
-        format_string = f"={TOTAL_TILES}H"
-        # Pack the list of integers into raw binary bytes
-        binary_data = struct.pack(format_string, *map_data)
-        # Write the raw bytes straight to disk
-        with open(filename, "wb") as f:
-            f.write(binary_data)
-        print(f"Map successfully saved to {filename} ({len(binary_data)} bytes).")
+    def SetId(self, x,y, tile_id):
+        self.chunkTiles[y*self.chunkWidth+x] = tile_id
+    def GetId(self, x,y):
+        return self.chunkTiles[y*self.chunkWidth+x]
+    def SetObjectId(self, x,y, tile_id):
+        self.chunkObjects[y*self.chunkWidth+x] = tile_id
+    def GetObjectId(self, x,y):
+        return self.chunkObjects[y*self.chunkWidth+x]
+    def SelectChunk(self, chunk_id):
+        # Store the active chunk ID so the level knows where it is
+        self.chunkId = chunk_id
+        
+        # Calculate the flat memory bounds based on the room index
+        start_idx = chunk_id * self.chunkSize
+        end_idx = start_idx + self.chunkSize
+        
+        # Slice the 1D arrays for the active room view
+        self.chunkTiles = self.tiles[start_idx:end_idx]
+        self.chunkObjects = self.entities[start_idx:end_idx]
+    def MoveActiveChunk(self, direction):
+        current = self.level.current_level
+        world_width = self.level.width   # 8 rooms wide
+        world_height = self.level.height # 8 rooms high
+        total_rooms = world_width * world_height
+
+        if direction == "left":
+            # Make sure we aren't on the left edge of the world grid
+            if current % world_width != 0:
+                self.level.SelectChunk(current - 1)
+        elif direction == "right":
+            # Make sure we aren't on the right edge of the world grid
+            if (current + 1) % world_width != 0:
+                self.level.SelectChunk(current + 1)
+        elif direction == "up":
+            # Make sure subtracting a row doesn't drop below 0
+            if current - world_width >= 0:
+                self.level.SelectChunk(current - world_width)
+        elif direction == "down":
+            # Make sure adding a row doesn't exceed total rooms
+            if current + world_width < total_rooms:
+                self.level.SelectChunk(current + world_width)
+
+    def Save(self, path):
+        # Concatenate arrays into one continuous memory block
+        combined_data = np.concatenate((self.tiles, self.entities))
+        # Write the raw int32 bytes
+        combined_data.tofile(path)
+
+    def Load(self, path):
+        data = np.fromfile(path, dtype=np.int32)
+        half = len(data)//2
+        self.tiles = data[:half]
+        self.object = data[half:]
+        self.chunkTiles = self.tiles[0 : self.chunkSize]
+        self.chunkObjects = self.entities[0 : self.chunkSize]
+    def create_default_room(self):
+        total_cells = self.chunkWidth * self.chunkHeight
+        # Fill layers with a defaults
+        self.tiles = [1 for _ in range(total_cells)]
+        self.entities = [0 for _ in range(total_cells)]
+    # Fix later? Draw needs objs from selector to convert the oject id to the proper tile id
+    def Draw(self, surface, atlas,objs):
+        for y in range(self.chunkHeight):
+            for x in range(self.chunkWidth):
+                # Calculate 1D index local to this chunk
+                index =  (y * self.chunkWidth) + x
+                pixel_y = y * self.tile_size
+                pixel_x = x * self.tile_size
+                tile_id = self.chunkTiles[index]
+                if tile_id > 0:
+                    # Draw tiles
+                    DrawTile(surface, atlas, tile_id, (pixel_x, pixel_y))
+                # Draw objects
+                obj_id = self.chunkObjects[index]
+                if obj_id > 0:
+                    DrawTile(surface, atlas, objs[obj_id], (pixel_x, pixel_y))
+
+class Selector:
+    def __init__(self, selector_rect, atlas, tile_size=16, scale=2):
+        self.rect = selector_rect
+        self.tileSize = tile_size
+        self.upscale = scale
+        self.atlas = atlas
+        self.scaled_tile_size = tile_size * scale# 32x
+        self.x = 960
+        self.scrollY = 0
+        # create data for now, load it in later
+        self.objectCatalog={
+            0: 0,  #dummy data/nothing
+            1: 288, #Player
+            2: 508, #enemy
+            3: 257, #chest
+        }
+    def Scroll(self, offset):
+        self.scrollY += offset
+
+    def HandleClick(self, mouse_pos, active_layer):
+        # Calculate local column and row relative pos
+        cc = int((mouse_pos[0] - self.rect.x)) // self.tileSize
+        cr = int((mouse_pos[1] + self.scrollY)) // self.tileSize
+        num_tiles = len(self.atlas)
+        # Flatten using old formula
+        columns = 4
+        selected_id = cc + (cr * columns)
+        # Safety clamp against maximum available assets
+        if active_layer == LAYER_TILE:
+            return selected_id % num_tiles
+        else:
+            return selected_id % len(self.objectCatalog)
+    def Draw(self, surface, atlas, active_layer):
+        columns = 4
+        rows = 8
+        max_visible = columns * rows
+        if active_layer == LAYER_TILE:
+            for i in range(len(self.atlas)):
+                col = i % columns
+                row = i // columns
+                
+                # Calculate screen coordinates factoring in scroll
+                x = self.rect.x + (col * self.tileSize)
+                y = (row * self.tileSize) - self.scrollY
+                if y < 0:
+                    continue
+                elif y >= self.rect.h:
+                    break
+
+                tile_id = i
+                if tile_id < len(atlas):
+                    DrawTile(surface, atlas, tile_id, (x, y))
+        else:
+            for i in range(len(self.objectCatalog)):
+                col = i % columns
+                row = i // columns
+                # Calculate screen coordinates factoring in scroll
+                x = self.rect.x + (col * self.tileSize)
+                y = (row * self.tileSize) - self.scrollY
+                if y < 0:
+                    continue
+                elif y >= self.rect.h:
+                    break
+                if i < len(self.objectCatalog):
+                    DrawTile(surface, atlas, self.objectCatalog[i], (x, y))
 
 class Tool(object):
     def use(self, grid_x, grid_y, tile_id, room):
@@ -103,129 +247,167 @@ class BrushTool(Tool):
         if 0 <= grid_x < room.width and 0 <= grid_y < room.height:
             room.tiles[grid_y][grid_x] = tile_id
 
-class TileSelection:
-    def __init__(self, tile_size=16, upscale_factor=4):
-        self.tile_size = tile_size
-        self.upscale = upscale_factor
-        self.scaled_tile_size = tile_size * upscale_factor # 64x64px
-        
-        self.current_layer = "TILES" # Or "OBJECTS"
-        self.active_id = 1           # Default brush ID
-        
-        # Sidebar positioning matrix
-        self.sidebar_x_start = 960
-        self.sidebar_width = 320
-
-    def handle_input(self, mouse_pos, mouse_click):
-        mx, my = mouse_pos
-        
-        # Check if the click happened strictly inside the Sidebar zone
-        if mx >= self.sidebar_x_start:
-            if mouse_click[0]: # Left Click
-                # Calculate which relative grid slot was clicked in the sidebar
-                relative_x = mx - self.sidebar_x_start
-                grid_x = relative_x // self.scaled_tile_size
-                grid_y = my // self.scaled_tile_size
-                
-                # TODO: Convert grid_x/y into your texture atlas ID 
-                # self.active_id = calculated_id
-                print(f"Selected Brush ID from Sidebar grid: {grid_x}, {grid_y}")
-
-    def update(self):
-        # Handle toggles like Tab to switch layers
-        pass
-
-    def draw(self, surface):
-        # Draw the sidebar background, grid outlines, and the texture atlas selection sheet
-        pass
-
 class LevelEditor:
-    def __init__(self):
-        self.window = Window()
-        self.world = World()
-        self.current_room = self.world.rooms[0][0]
-        self.current_tool = BrushTool()
-        self.selected_tile_id = 1
-        self.mapFile = None
-        self.map_rect = pygame.Rect(0, 0, 960, 576)
-        self.palette_rect = pygame.Rect(960, 0, 320, 576)
-        self.minimap_rect = pygame.Rect(960, 400, 320, 144)
-        self.console_rect = pygame.Rect(0, 576, 960, 144)
-        self.chunkWidth = 15
-        self.chunkHeight = 9
-        self.chunkSize = self.chunkWidth * self.chunkHeight
-        self.mapWidth = 8
-        self.mapHeight = 8
-        self.mapSize = self.mapWidth*self.mapHeight
-        self.buffer = CreateArray(self.chunkSize, 0)
-        #self.loadedChunkBuffer = []
-        #self.chunkdirection = 0
+    def __init__(self, window, atlas, level):
+        self.window = window
+        self.canvas = window.GetSurface()
+        self.atlas = atlas
+        self.level = level
+        #self.tool = BrushTool()
+        self.tileSize = 16
+        self.selectedTile = 16
+        self.selectedObject = 0
+        self.activeLayer = LAYER_TILE
+        self.rect = pygame.Rect(0, 0, 960/self.window.scale, 576/self.window.scale)
+        self.selectorRect = pygame.Rect(992/self.window.scale, 0, 320/self.window.scale, 576/self.window.scale)
+        self.minimapRect = pygame.Rect(960/self.window.scale, 400/self.window.scale, 320/self.window.scale, 144/self.window.scale)
+        self.consoleRect = pygame.Rect(0, 576/self.window.scale, 960/self.window.scale, 144/self.window.scale)
+        self.selector = Selector(self.selectorRect, atlas)
+        self.running = True
+        self.gridX, self.gridY = 0,0
+        self.mouseX, self.mouseY = 0,0
+        self.consoleLog = []
+    def Log(self, msg):
+        self.consoleLog.append(msg)
+        if len(self.consoleLog) > 10:
+            self.consoleLog.pop(0)
+    def HandleEvents(self, events):
+        # Loop through the list passed from main
+        for event in events:
+            if event.type == pygame.QUIT:
+                self.running = False
+            # Mouse motion
+            elif event.type == pygame.MOUSEMOTION:
+                x, y = event.pos#m_pos = pygame.mouse.get_pos()
+                scale = self.window.scale
+                mx = x//scale
+                my = y//scale
+                self.mouseX, self.mouseY = mx, my
+                # Calculate tile coordinates in map
+                self.gridX = max(0, min(int(mx // self.tileSize), self.level.chunkWidth - 1))#- mapOffset_x
+                self.gridY = max(0, min(int(my // self.tileSize), self.level.chunkHeight - 1))#- mapOffset_y
 
-    def CreateMapFile(self, path):
-        f = open(path,"w")
-        for i in range(0,self.mapSize):
-            for j in range(0,self.chunkSize):
-                f.write("{:<3}".format(str(i)))#ljust(3)#f.write(str(i).zfill(3))
-        f.close()
-
-    def LoadChunk(self, i, path):
-        self.mapFile = open(path,"r")
-        #mult by 3 since we save 3 digits per tile
-        self.mapFile.seek(i*(self.chunkSize*3))
-        for i in range(0,self.chunkSize):
-            self.buffer[i] = int(self.mapFile.read(3).replace(" ",""))
-        self.mapFile.close()
+            # Left mouse button press
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if self.selectorRect.x < self.mouseX:
+                    selected_id = self.selector.HandleClick((self.mouseX,self.mouseY), self.activeLayer)
+                    
+                    if self.activeLayer == LAYER_TILE:
+                        self.selectedTile = selected_id
+                        self.Log(f"Selected Tile ID: {selected_id}")
+                    elif self.activeLayer == LAYER_OBJECT:
+                        self.selectedObject = selected_id
+                        self.Log(f"Selected Object ID: {selected_id}")
+            # Right mouse button
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                if self.mouseX < self.rect.w and self.mouseY < self.rect.h:
+                    if self.activeLayer == LAYER_TILE:
+                        # Copy tile from level
+                        self.selectedTile = self.level.GetId(self.gridX, self.gridY)
+                    else:
+                        self.selectedObject = self.level.GetObjectId(self.gridX, self.gridY)
+                elif self.selectorRect.x < self.mouseX:
+                    # Copy tile from selector
+                    selected_id = self.selector.HandleClick((self.mouseX,self.mouseY), self.activeLayer)
+                    
+                    if self.activeLayer == LAYER_TILE:
+                        self.selectedTile = selected_id
+                        self.Log(f"Selected Tile ID: {selected_id}")
+                    elif self.activeLayer == LAYER_OBJECT:
+                        self.selectedObject = selected_id
+                        self.Log(f"Selected Object ID: {selected_id}")
+            elif event.type == pygame.MOUSEWHEEL:
+                if event.y > 0:
+                    self.selector.Scroll(128)
+                elif event.y < 0:
+                    self.selector.Scroll(-128)
+            # Key pressese
+            elif event.type == pygame.KEYDOWN:
+                current = self.level.chunkId
+                world_width = self.level.width # 8 rooms wide
+                # Change chunk/room
+                if event.key == pygame.K_LEFT:
+                    if current % world_width != 0:
+                        current -= 1
+                        self.level.SelectChunk(current)
+                        self.Log(f"Current room ({current % self.level.width},{current // self.level.width})")
+                elif event.key == pygame.K_RIGHT:
+                    if (current + 1) % world_width != 0:
+                        current += 1
+                        self.level.SelectChunk(current)
+                        self.Log(f"Current room ({current % self.level.width},{current // self.level.width})")
+                elif event.key == pygame.K_UP:
+                    if current - world_width >= 0:
+                        current -= world_width
+                        self.level.SelectChunk(current)
+                        self.Log(f"Current room ({current % self.level.width},{current // self.level.width})")
+                elif event.key == pygame.K_DOWN:
+                    if current + world_width < self.level.size:
+                        current += world_width
+                        self.level.SelectChunk(current)
+                        self.Log(f"Current room ({current % self.level.width},{current // self.level.width})")
+                # Toggle mode tiles/ objects
+                elif event.key == pygame.K_TAB:
+                    self.selector.scrollY = 0
+                    if self.activeLayer == LAYER_TILE:
+                        self.activeLayer = LAYER_OBJECT
+                    else:
+                        self.activeLayer = LAYER_TILE
+                elif event.key == pygame.K_s:
+                    #use current level to change level in future?
+                    self.level.Save("0.bin")
+                    self.Log("Level saved as 0.bin")
+                elif event.key == pygame.K_l:
+                    #use current level to change level in future?
+                    self.level.Load("0.bin")
+                    self.Log("Loaded level 0.bin")
+                    
     def Update(self):
-        #
-        pass
-
-    def OpenMap(self, path):
-        self.mapFile = open(path,"r")
-
-    def CloseMap(self):
-        self.mapFile.close()
-
-    def PrintBuffer(self):
-        print(self.buffer)
+        # Continuous inputs go here
+        mouse_buttons = pygame.mouse.get_pressed()
+        # Left button held
+        if mouse_buttons[0]:  
+            # Confirm mouse is inside the map area
+            if self.mouseX < self.rect.w and self.mouseY < self.rect.h:
+                if self.activeLayer == LAYER_TILE:
+                    self.level.SetId(self.gridX, self.gridY, self.selectedTile)
+                else:
+                    self.level.SetObjectId(self.gridX, self.gridY, self.selectedObject)
+        if mouse_buttons[1]:
+            pass
+    def Draw(self):
+        self.level.Draw(self.canvas, self.atlas, self.selector.objectCatalog)
+        self.selector.Draw(self.canvas, self.atlas, self.activeLayer)
+        self.window.Scale()
+        for i in range(len(self.consoleLog)):
+            self.window.Draw(font.render(self.consoleLog[i],True,(255,255,255)),(8,592+(i*12)))
+        self.window.Update()
+    def Quit(self):
+        pygame.display.quit()
+        pygame.quit()
+        sys.exit()
 
 if __name__ == "__main__":
     window = Window()
-    buffer = window.GetBuffer()
-    #level = Level()
-    #level.CreateMapFile()
-    #level.OpenMap("map.txt")
-    #level.LoadChunk(4, "map.txt")
-    #level.PrintBuffer()
-
+    atlas = LoadTilesheet("data/atlas.png", 16)
+    canvas = window.GetSurface()
+    lvl = Level()
+    lvled = LevelEditor(window, atlas, lvl)
     clock = pygame.time.Clock()
-    atlas = load_tilesheet("data/atlas.png", 16)
-    font = pygame.font.SysFont("Arial", 14)#font = pygame.font.Font(os.path.join(os.getcwd(),'FreeMonoBold.ttf'),12)
+    font = pygame.font.SysFont("Arial", 12)#font = pygame.font.Font(os.path.join(os.getcwd(),'FreeMonoBold.ttf'),12)
     random.seed(0)
+    #add intro message
+    lvled.Log("Check README.md for controls")
 
-    isRunning = True
-    while isRunning:
+    while lvled.running:
         window.Clear()
-        clock.tick(60)
+        events = pygame.event.get()
 
-        window.DrawTile(atlas, 0, (0,0))
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                isRunning = False
-            elif event.type == MOUSEBUTTONDOWN and event.button == 1:
-                print("test1")
-            elif event.type == MOUSEBUTTONDOWN and event.button == 3:
-                print("test3")
-            pressed = pygame.key.get_pressed()
-            if pressed[K_s]:
-                pygame.image.save(buffer,'pallette.bmp')
-            elif pressed[K_r]:
-                pass
-            elif pressed[K_q]:
-                isRunning = False
+        lvled.HandleEvents(events)
+        lvled.Update()
+        lvled.Draw()
+        clock.tick(60)
         
-        buffer.blit(font.render("test",True,(255,255,255)),(8,256))
-        window.Update()
-        
-    pygame.display.quit()
-    pygame.quit()
-    sys.exit
+    lvled.Quit()
+
+#import array; grid = array.array('i', [0] * (width * height))
