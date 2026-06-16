@@ -1,4 +1,7 @@
 # Ignore a specific file i.e secrets.json
+SDLEngine.vcxproj
+SDLEngine.vcxproj.filters
+SDLEngine.vcxproj.user
 
 # Ignore folders
 .vs/
@@ -7,6 +10,3 @@ SDLEngine/
 
 # Ignore all files with a specific extension
 *.dll
-*.vcxproj
-*.filters
-*.user
