@@ -12,7 +12,7 @@ void GameInit(void) {
     EngineInit("Game", 960, 540);//(320, 180, "Game"); (640, 360, "Game");
     //DatabaseInit();
     DatabaseLoadAssets();
-    //LevelInit();
+    LevelInit();
     EntityManagerInit();
     // Load initial map data
     //LevelLoad("0.bin");
@@ -85,7 +85,7 @@ void GameDraw(void) {
                 ImageDrawTile(c * 16, r * 16, TEX_ATLAS, 68);
             }
         }
-        
+        LevelDraw();
         //LevelDrawBackground();  // Layer 1 - Floors, Paths, Water
         EntityDrawAll();          // Layer 2 - Player, Enemies, Items (Y-Sorted?)
         //LevelDrawForeground();  // Layer 3 - Overhead door frames, tree tops

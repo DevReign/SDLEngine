@@ -27,7 +27,7 @@ struct EntityBlueprint entityDatabase[ENT_COUNT] = {
         .type = TYPE_CREATURE, .ai = AI_NONE,
         .maxHealth = 100, .touchDamage = 0, .speed = 2,
         .width = 12, .height = 12, .rotateSprite = false, // Slightly smaller hitbox for forgiving collisions
-        .projectileId = 0, .frameStart = 0, .frameAttack = 8, .numFrames = 4, .animRate = 0.12f
+        .projectileId = 0, .frameStart = 320, .frameAttack = 8, .numFrames = 4, .animRate = 0.12f
     },
     // ENT_ZOMBIE
     {

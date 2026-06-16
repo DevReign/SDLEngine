@@ -10,8 +10,7 @@ int main(int argc, char* args[])
 	//--------------------------------------------------------
 	// Main loop
 	//--------------------------------------------------------
-	while (EngineIsRunning())
-	{
+	while (EngineIsRunning()){
 		EngineUpdate();
 		GameUpdate();
 		EngineRenderStart();
