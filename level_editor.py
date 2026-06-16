@@ -3,28 +3,11 @@ import numpy as np
 from pygame.locals import *
 from pathlib import Path
 
-ATLAS_CONFIG = {
-    "world":      {"start_row": 0,  "tile_size": 8},
-    "objects":   {"start_row": 8,  "tile_size": 16},
-}
-
-MAP_WIDTH = 15
-MAP_HEIGHT = 9
-TOTAL_TILES = MAP_WIDTH * MAP_HEIGHT
 # Level editor layers
 LAYER_TILE = 0
 LAYER_OBJECT = 1
 
-# TODO - Move these functions later
-def IsPointInRect(point, rect):
-    """
-    Checks if a point (x, y) is inside a rectangle.
-    rect format: (min_x, min_y, max_x, max_y)
-    """
-    x, y = point
-    min_x, min_y, max_x, max_y = rect
-    return min_x <= x <= max_x and min_y <= y <= max_y # Change '<=' to '<' if you want to exclude the borders
-
+# TODO - Move these functions later, maybe make proper wrappers
 def RoundToNearest(i, j):
     return i & ~(j-1)
 
@@ -94,7 +77,20 @@ class Level:
             self.Load('0.bin')
         else:
             print("The file does not exist.")
-
+    def Save(self,path):
+        # Force arrays to 32-bit integers to match C's int size
+        tiles_raw = self.tiles.astype(np.int32).tobytes()
+        entities_raw = self.entities.astype(np.int32).tobytes()
+        with open(path, "wb") as f:
+            f.write(tiles_raw)
+            f.write(entities_raw)
+        f.close()
+    def Load(self, path):
+        # Read the entire flat binary stream of 32-bit ints
+        raw_data = np.fromfile(path, dtype=np.int32)
+        self.tiles = raw_data[0:self.chunkSize*self.size]
+        self.entities = raw_data[self.chunkSize*self.size:]#.reshape((9, 15))
+        self.SelectChunk(0)
     def SetId(self, x,y, tile_id):
         self.chunkTiles[y*self.chunkWidth+x] = tile_id
     def GetId(self, x,y):
@@ -116,8 +112,8 @@ class Level:
         self.chunkObjects = self.entities[start_idx:end_idx]
     def MoveActiveChunk(self, direction):
         current = self.level.current_level
-        world_width = self.level.width   # 8 rooms wide
-        world_height = self.level.height # 8 rooms high
+        world_width = self.level.width
+        world_height = self.level.height
         total_rooms = world_width * world_height
 
         if direction == "left":
@@ -137,24 +133,6 @@ class Level:
             if current + world_width < total_rooms:
                 self.level.SelectChunk(current + world_width)
 
-    def Save(self, path):
-        # Concatenate arrays into one continuous memory block
-        combined_data = np.concatenate((self.tiles, self.entities))
-        # Write the raw int32 bytes
-        combined_data.tofile(path)
-
-    def Load(self, path):
-        data = np.fromfile(path, dtype=np.int32)
-        half = len(data)//2
-        self.tiles = data[:half]
-        self.object = data[half:]
-        self.chunkTiles = self.tiles[0 : self.chunkSize]
-        self.chunkObjects = self.entities[0 : self.chunkSize]
-    def create_default_room(self):
-        total_cells = self.chunkWidth * self.chunkHeight
-        # Fill layers with a defaults
-        self.tiles = [1 for _ in range(total_cells)]
-        self.entities = [0 for _ in range(total_cells)]
     # Fix later? Draw needs objs from selector to convert the oject id to the proper tile id
     def Draw(self, surface, atlas,objs):
         for y in range(self.chunkHeight):
@@ -179,7 +157,6 @@ class Selector:
         self.upscale = scale
         self.atlas = atlas
         self.scaled_tile_size = tile_size * scale# 32x
-        self.x = 960
         self.scrollY = 0
         # create data for now, load it in later
         self.objectCatalog={
@@ -255,8 +232,8 @@ class LevelEditor:
         self.level = level
         #self.tool = BrushTool()
         self.tileSize = 16
-        self.selectedTile = 16
-        self.selectedObject = 0
+        self.selectedTile = 1
+        self.selectedObject = 1
         self.activeLayer = LAYER_TILE
         self.rect = pygame.Rect(0, 0, 960/self.window.scale, 576/self.window.scale)
         self.selectorRect = pygame.Rect(992/self.window.scale, 0, 320/self.window.scale, 576/self.window.scale)
@@ -353,14 +330,23 @@ class LevelEditor:
                         self.activeLayer = LAYER_OBJECT
                     else:
                         self.activeLayer = LAYER_TILE
+                elif event.key == pygame.K_p:
+                    #use current level to change level in future?
+                    self.level.ExportRaw("0.bin")
+                    self.Log("Level saved as 0.bin")
                 elif event.key == pygame.K_s:
                     #use current level to change level in future?
-                    self.level.Save("0.bin")
-                    self.Log("Level saved as 0.bin")
+                    self.level.Save("0.npy")
+                    self.Log("Level saved as 0.npy")
                 elif event.key == pygame.K_l:
                     #use current level to change level in future?
-                    self.level.Load("0.bin")
+                    self.level.Load("0.npy")
                     self.Log("Loaded level 0.bin")
+                elif event.key == pygame.K_i:
+                    #use current level to change level in future?
+                    self.level.ImportRaw("0.bin")
+                    self.Log("Loaded level 0.bin")
+                    
                     
     def Update(self):
         # Continuous inputs go here
@@ -410,4 +396,44 @@ if __name__ == "__main__":
         
     lvled.Quit()
 
+
+'''
+Todo:
+add more tools
+add lvl editor type objects (player spawn, doors, ladders, etc)
+
+alt for numpy
 #import array; grid = array.array('i', [0] * (width * height))
+
+old numpy save/load funcs
+    def Save(self, path):
+        # Concatenate arrays into one continuous memory block
+        combined_data = np.concatenate((self.tiles, self.entities))
+        # Write the raw int32 bytes
+        combined_data.tofile(path)
+
+    def Load(self, path):
+        data = np.fromfile(path, dtype=np.int32)
+        half = len(data)//2
+        self.tiles = data[:half]
+        self.object = data[half:]
+        self.chunkTiles = self.tiles[0 : self.chunkSize]
+        self.chunkObjects = self.entities[0 : self.chunkSize]
+
+
+can use something like this to track and not show objects in the tile selection capping it
+        ATLAS_CONFIG = {
+    "world":   {"start_row": 0,  "tile_size": 8},
+    "objects": {"start_row": 8,  "tile_size": 16},
+}
+
+def IsPointInRect(point, rect):
+    """
+    Checks if a point (x, y) is inside a rectangle.
+    rect format: (min_x, min_y, max_x, max_y)
+    """
+    x, y = point
+    min_x, min_y, max_x, max_y = rect
+    return min_x <= x <= max_x and min_y <= y <= max_y # Change '<=' to '<' to exclude the borders
+
+'''

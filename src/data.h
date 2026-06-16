@@ -7,8 +7,7 @@
 
 // Texture slot mappings for the Image module
 typedef enum {
-    TEX_WORLD = 0,
-    TEX_OBJECTS,
+    TEX_ATLAS = 0,
     TEX_GUI,
     TEX_COUNT
 } TilesheetID;

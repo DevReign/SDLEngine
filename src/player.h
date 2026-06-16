@@ -4,7 +4,6 @@
 #include "config.h"
 #include "entity.h"
 
-
 // Unified state tracker for inventory and upgrades
 typedef struct {
     // Items

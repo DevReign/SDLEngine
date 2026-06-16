@@ -2,13 +2,12 @@
 
 void DatabaseLoadAssets(void) {
     // Load Graphic Atlas Sheets
-    ImageLoadTilesheet("data/Tiles.bmp", TEX_WORLD, 16, 16);
-    ImageLoadTilesheet("data/Entities.bmp", TEX_OBJECTS, 16, 16);
-    ImageLoadTilesheet("data/Gui.bmp", TEX_GUI, 8, 8);
+    ImageLoadTilesheet("images/atlas.bmp", TEX_ATLAS, 16, 16);
+    ImageLoadTilesheet("images/gui.bmp", TEX_GUI, 8, 8);
 
     // Music & Sounds
-    AudioLoadMusic("data/Retroloop.ogg");
-    AudioLoadSound("data/bfxrHit.ogg", SND_HIT);
+    AudioLoadMusic("audio/Retroloop.ogg");
+    AudioLoadSound("audio/bfxrHit.ogg", SND_HIT);
 
     // Configure
     AudioSetVolume(10);

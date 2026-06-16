@@ -58,7 +58,7 @@ void EntityKill(Entity *e){
 
 void EntityDraw(Entity  *e){
 	SDL_Point center = { 8, 8 };
-	ImageDrawTileExt(e->pos.x, e->pos.y, TEX_OBJECTS, e->frame, e->direction, &center, 0x00000000);
+	ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 }
 
 void EntityMove(Entity *e, Vec2 v){
@@ -123,7 +123,7 @@ void EntityDrawAll()
 	for (uint8 i = 0; i < 32; ++i) {
 		if (entities[i].id == 0) continue;
 		e = &entities[i];
-		ImageDrawTileExt(e->pos.x, e->pos.y, TEX_OBJECTS, e->frame, e->direction, &center, 0x00000000);
+		ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 	}
 }
 Entity* EntityGetAtPoint(int px, int py) {

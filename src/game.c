@@ -82,7 +82,7 @@ void GameDraw(void) {
         {
             for (uint16 c = 0; c < 20; ++c)
             {
-                ImageDrawTile(c * 16, r * 16, TEX_WORLD, 1);
+                ImageDrawTile(c * 16, r * 16, TEX_ATLAS, 68);
             }
         }
         

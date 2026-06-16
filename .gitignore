@@ -7,3 +7,6 @@ SDLEngine/
 
 # Ignore all files with a specific extension
 *.dll
+*.vcxproj
+*.filters
+*.user
