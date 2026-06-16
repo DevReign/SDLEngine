@@ -25,7 +25,7 @@ void InputUpdate(){
         b = events.button.button;
 
         switch (events.type){
-        case SDL_QUIT: WindowQuitMainLoop(); break;
+		case SDL_QUIT: printf("Pressed quit"); WindowQuitMainLoop(); break;
         case SDL_KEYUP: keyHeld[k] = false; break;
         case SDL_KEYDOWN:
 

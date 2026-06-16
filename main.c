@@ -4,7 +4,6 @@
 int main(int argc, char* args[])
 {
 	//Init engine and game
-	EngineInit("My Game Framework", 960, 540);
 	GameInit(); 
 	
 	//--------------------------------------------------------

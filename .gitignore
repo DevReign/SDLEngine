@@ -1,6 +1,4 @@
 # Ignore a specific file i.e secrets.json
-SDLEngine.vcxproj
-SDLEngine.vcxproj.filters
 SDLEngine.vcxproj.user
 
 # Ignore folders

@@ -25,7 +25,8 @@ void LevelDraw() {
     for (int r = 0; r < CHUNK_HEIGHT;  r++){
         for (int c = 0; c < CHUNK_WIDTH; c++){
             i = tileData[r * CHUNK_WIDTH + c];
-            ImageDrawTile(c * 16, r * 16, TEX_ATLAS, i);
+            // add 40 to center the map for now
+            ImageDrawTile(c * 16+ 40, r * 16, TEX_ATLAS, i);
         }
     }
 }
@@ -34,28 +35,3 @@ short LevelInit() {
     SDL_memset(objectData, 0, ARRAY_SIZE);
     LevelLoad("0.bin");
 }
-
-/*int load_raw_room_data(const char* filename) {
-
-    FILE* file = fopen(filename, "rb");
-
-    if (!file){
-
-        printf("Error: Could not open raw map file: %s\n", filename);
-        return 0;
-    }
-
-    size_t tiles_read = fread(out_room->tiles, sizeof(int), ROOM_HEIGHT * ROOM_WIDTH, file);
-    size_t entities_read = fread(out_room->entities, sizeof(int), ROOM_HEIGHT * ROOM_WIDTH, file);
-
-    fclose(file);
-
-    int expected_elements = ROOM_HEIGHT * ROOM_WIDTH;
-
-    if (tiles_read != expected_elements || entities_read != expected_elements) {
-
-        printf("Warning: Map file data mismatch.\n");
-        return 0;
-    }
-    return 1;
-}*/
