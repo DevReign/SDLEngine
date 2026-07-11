@@ -5,7 +5,7 @@ static struct TileSheet tiles[MAX_TILESHEETS];
 
 void ImageInit(SDL_Renderer* r)
 {
-	for (uint8 i = 0; i < MAX_TILESHEETS; ++i)
+	for (unsigned char i = 0; i < MAX_TILESHEETS; ++i)
 	{
 		tiles[i].texture = nullptr;
 	}
@@ -135,7 +135,7 @@ void ImageDrawExt(int x, int y, unsigned short img_id, double angle, SDL_Rendere
 
 void ImageQuit(){
 	//Free up memory from Textures
-	for (uint8 i = 0; i < MAX_TILESHEETS; ++i){
+	for (unsigned char i = 0; i < MAX_TILESHEETS; ++i){
 		if (tiles[i].texture != 0){
 			SDL_DestroyTexture(tiles[i].texture);
 			tiles[i].texture = 0;

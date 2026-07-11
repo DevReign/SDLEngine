@@ -25,17 +25,17 @@ struct EntityBlueprint entityDatabase[ENT_COUNT] = {
     // ENT_PLAYER
     {
         .type = TYPE_CREATURE, .ai = AI_NONE,
-        .maxHealth = 100, .touchDamage = 0, .speed = 2,
-        .width = 12, .height = 12, .rotateSprite = false, // Slightly smaller hitbox for forgiving collisions
+        .maxHealth = 100, .touchDamage = 0, .speed = 1,
+        .width = 16, .height = 16, .rotateSprite = false, // Slightly smaller hitbox for forgiving collisions
         .projectileId = 0, .frameStart = 320, .frameAttack = 8, .numFrames = 4, .animRate = 0.12f
     },
     // ENT_ZOMBIE
     {
         .type = TYPE_CREATURE, .ai = AI_CHASE_PLAYER,
         .maxHealth = 30, .touchDamage = 10, .speed = 1,
-        .width = 14, .height = 14, .rotateSprite = false,
-        .projectileId = 0, .frameStart = 16, .frameAttack = 16, .numFrames = 4, .animRate = 0.16f
-    }
+        .width = 16, .height = 16, .rotateSprite = false,
+        .projectileId = 0, .frameStart = 508, .frameAttack = 16, .numFrames = 4, .animRate = 0.16f
+    },
 };
 
 /*

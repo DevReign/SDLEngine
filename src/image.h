@@ -9,10 +9,10 @@
 struct TileSheet
 {
 	SDL_Texture* texture;
-	uint16 tileWidth;
-	uint16 tileHeight;
-	uint16 width;
-	uint16 height;
+	unsigned short tileWidth;
+	unsigned short tileHeight;
+	unsigned short width;
+	unsigned short height;
 };
 
 void ImageInit(SDL_Renderer* r);

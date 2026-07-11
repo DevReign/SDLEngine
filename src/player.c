@@ -1,6 +1,7 @@
 #include "player.h"
 #include "engine.h"
 #include "data.h"
+#include "projectile.h"
 
 PlayerProgress g_playerProgress = { 0 };
 
@@ -14,32 +15,35 @@ void PlayerInit(int gridX, int gridY) {
 
 void PlayerUpdate(void) {
     if (g_player == NULL || g_player->id == 0) return;
-    
+    int x = 0;
+    int y = 0;
     if (InputIsKeyHeld(SDLK_a))
     {
-        g_player->pos.x -= 1;
+        x = -1;
         g_player->direction = 90;
         EntityAnimate(g_player);
     }
     if (InputIsKeyHeld(SDLK_d))
     {
-        g_player->pos.x += 1;
+        x = 1;
         g_player->direction = 270;
         EntityAnimate(g_player);
     }
     if (InputIsKeyHeld(SDLK_w))
     {
-        g_player->pos.y -= 1;
+        y = -1;
         g_player->direction = 180;
         EntityAnimate(g_player);
     }
     if (InputIsKeyHeld(SDLK_s))
     {
-        g_player->pos.y += 1;
+        y = 1;
         g_player->direction = 0;
         EntityAnimate(g_player);
     }
+    EntityMoveWithCollision(g_player,x,y);
 
     if (InputIsKeyPressed(SDLK_SPACE)) {
     }
+
 }

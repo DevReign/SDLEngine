@@ -44,7 +44,7 @@ void AudioLoadMusic(const char* fname){
 
 }
 
-void AudioPlaySound(uint16 id)
+void AudioPlaySound(unsigned short id)
 {
 	assert(id < MAX_SOUNDS);
 	if (sounds[id] == nullptr)
@@ -77,7 +77,7 @@ void AudioStopMusic(){
 
 void AudioQuit(){
 	//Free up memory from sounds
-	for (uint8 i = 0; i < MAX_SOUNDS; ++i){
+	for (unsigned char i = 0; i < MAX_SOUNDS; ++i){
 		if (sounds[i] != nullptr){
 			Mix_FreeChunk(sounds[i]);
 			sounds[i] = nullptr;

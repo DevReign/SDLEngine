@@ -7,7 +7,7 @@
 // Unified state tracker for inventory and upgrades
 typedef struct {
     // Items
-    uint8_t  keys;
+    unsigned char keys;
     // Upgrades / Progression Flags
     bool     hasSpeedBoots;
     // Stat Modifiers

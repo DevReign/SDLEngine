@@ -5,18 +5,20 @@
 #include "data.h"
 
 #define MAX_ENTITIES 64
+#define GET_CENTER_X ((Entity).x + ((Entity).width/2))
+#define GET_CENTER_Y ((Entity).y + ((Entity).height/2))
 
 typedef struct tagEntity{
-	uint16 id; //unique entity id
-	uint16 health;
+	unsigned short id; //unique entity id
+	unsigned short health;
 	Vec2 pos;
 	struct EntityBlueprint *data;
 	bool invulnerable;
 	bool playingAnim;
-	uint8 state;
-	uint16 frame, direction;
+	unsigned char state;
+	unsigned short frame, direction;
 	float attackTimer, animTimer, flinchTimer;
-	signed int left, top, right, bottom;
+	signed int x, y, right, bottom;
 } Entity;
 
 extern Entity* g_player;
@@ -29,8 +31,10 @@ void EntityAnimate(Entity* e);
 //bool EntityCollide();
 Entity *EntitySpawn(int x, int y, unsigned int eid);
 void EntityKill(Entity *e);
+void EntityClearAll();
 void EntityUpdateAll();
 void EntityDrawAll();
 //void EntityQuit() {};
+void EntityMoveWithCollision(Entity* e, int velx, int vely);
 
 #endif

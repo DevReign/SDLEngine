@@ -71,6 +71,7 @@ void WindowInitialize(unsigned short w, unsigned short h, const char * title){
 				SDL_SetRenderDrawColor(renderer, 0x0, 0x0, 0x0, 0x0);//(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			}
 		}
+		//SDL_Texture* canvas = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_RENDERER_TARGETTEXTURE);
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 		SDL_RenderSetLogicalSize(renderer, (int)(w / scale), (int)(h / scale));//SDL_RenderSetScale(renderer, scale, scale);
 		//Mix_Init(MIX_INIT_OGG)

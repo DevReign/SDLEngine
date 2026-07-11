@@ -331,20 +331,12 @@ class LevelEditor:
                     else:
                         self.activeLayer = LAYER_TILE
                 elif event.key == pygame.K_p:
-                    #use current level to change level in future?
-                    self.level.ExportRaw("0.bin")
-                    self.Log("Level saved as 0.bin")
+                    pass
                 elif event.key == pygame.K_s:
-                    #use current level to change level in future?
-                    self.level.Save("0.npy")
-                    self.Log("Level saved as 0.npy")
+                    self.level.Save("0.bin")
+                    self.Log("Level saved as 0.bin")
                 elif event.key == pygame.K_l:
-                    #use current level to change level in future?
-                    self.level.Load("0.npy")
-                    self.Log("Loaded level 0.bin")
-                elif event.key == pygame.K_i:
-                    #use current level to change level in future?
-                    self.level.ImportRaw("0.bin")
+                    self.level.Load("0.bin")
                     self.Log("Loaded level 0.bin")
                     
                     

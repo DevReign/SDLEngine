@@ -18,6 +18,9 @@
 
 void LevelSave(const char* filename);
 void LevelLoad(const char* filename);
+void LevelSelectRoom(int id);
 void LevelDraw();
 short LevelInit();
+short LevelFindAdjectId(short dir);
+bool LevelIsTileSolid(int x, int y);
 #endif

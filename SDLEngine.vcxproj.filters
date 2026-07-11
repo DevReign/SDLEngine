@@ -66,6 +66,9 @@
     <ClCompile Include="src\hud.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\projectile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\hud.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\projectile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

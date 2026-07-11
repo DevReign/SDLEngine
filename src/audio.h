@@ -12,7 +12,7 @@ void AudioSetVolumeMusic(int vol);
 void AudioSetVolume(int vol);
 void AudioLoadSound(const char * fname, unsigned int id);
 void AudioLoadMusic(const char* fname);
-void AudioPlaySound(uint16 id);
+void AudioPlaySound(unsigned short id);
 void AudioPlayMusic();
 void AudioPauseMusic();
 void AudioStopMusic();

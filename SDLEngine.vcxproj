@@ -30,6 +30,7 @@
     <ClCompile Include="src\image.c" />
     <ClCompile Include="src\input.c" />
     <ClCompile Include="src\level.c" />
+    <ClCompile Include="src\projectile.c" />
     <ClCompile Include="src\player.c" />
     <ClCompile Include="src\utility.c" />
     <ClCompile Include="src\vector.c" />
@@ -47,6 +48,7 @@
     <ClInclude Include="src\image.h" />
     <ClInclude Include="src\input.h" />
     <ClInclude Include="src\level.h" />
+    <ClInclude Include="src\projectile.h" />
     <ClInclude Include="src\player.h" />
     <ClInclude Include="src\utility.h" />
     <ClInclude Include="src\vector.h" />

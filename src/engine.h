@@ -8,6 +8,8 @@
 #include "clock.h"
 #include "config.h"
 
+#define sign(x) ((x>0)-(x<0))
+
 // High-level engine controls
 void EngineInit(const char* title, int w, int h);
 void EngineUpdate(); // Handles input and clock

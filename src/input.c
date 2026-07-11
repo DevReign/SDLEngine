@@ -1,6 +1,6 @@
 #include "input.h"
 
-static uint8 lastKey = '\0';
+static unsigned char lastKey = '\0';
 static bool pressedExit = false;
 static bool mousePressed[4] = { 0 };
 static bool mouseHeld[4] = { 0 };
@@ -11,9 +11,9 @@ static SDL_Event events;
 
 //Gets SDL's events and stores them in our struct to be used elsewhere.
 void InputUpdate(){
-	uint16 k = 0;
-	uint8 b = 0;
-	uint16 counter = 0;
+	unsigned short k = 0;
+	unsigned char b = 0;
+	unsigned short counter = 0;
 
 	//Clear pressed keys
 	SDL_memset(keyPressed, 0, MAX_KEYS);
@@ -55,38 +55,36 @@ bool InputCheckQuiting(){
 	return pressedExit;
 }
 
-bool InputIsKeyPressed(uint8 k){
+bool InputIsKeyPressed(unsigned char k){
 	if (keyPressed[k])
 		return true;
 	return false;
 }
 
-bool InputIsKeyHeld(uint8 k)
-{
+bool InputIsKeyHeld(unsigned char k){
 	if (keyHeld[k])
 		return true;
 	return false;
 }
 
-bool InputIsMousePressed(uint8 bttn)
-{
+bool InputIsMousePressed(unsigned char bttn){
 	if (mousePressed[bttn])
 		return true;
 	return false;
 }
 
-bool InputIsMouseHeld(uint8 bttn)
-{
+bool InputIsMouseHeld(unsigned char bttn){
 	if (mouseHeld[bttn])
 		return true;
 	return false;
 }
 
 //Return mouse coordinates
-SDL_Point InputGetMousePos()
-{
+SDL_Point InputGetMousePos(){
 	SDL_Point pos;
 	pos.x = mouseX;
 	pos.y = mouseY;
 	return pos;
 }
+int InputGetMouseX() { return mouseX; }
+int InputGetMouseY() { return mouseY; }

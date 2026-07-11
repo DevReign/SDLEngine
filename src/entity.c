@@ -2,7 +2,7 @@
 #include "level.h"
 
 static Entity entities[MAX_ENTITIES] = { 0 };//static Entity *entityPool[64] = { 0 };
-static uint16 entityCount = 0;
+static unsigned short entityCount = 0;
 
 Entity* g_player = NULL;
 extern struct EntityBlueprint entityDatabase[ENT_COUNT];
@@ -23,7 +23,7 @@ void EntityManagerInit() {
 }
 
 Entity* EntitySpawn(int x, int y, unsigned int eid) {
-	struct EntityBlueprint* dummyData = &entityDatabase[ENT_DUMMY];
+	//struct EntityBlueprint* dummyData = &entityDatabase[ENT_DUMMY];
 	struct EntityBlueprint* spawnData = &entityDatabase[eid];
 
 	for (int i = 0; i < MAX_ENTITIES; i++) {
@@ -56,7 +56,18 @@ void EntityKill(Entity *e){
 	e->data = &entityDatabase[ENT_DUMMY];
 }
 
+//Don't clear player, so start at 1
+void EntityClearAll() {
+	for (int i = 1; i < MAX_ENTITIES; i++) {
+		Entity* e = &entities[i];
+		SDL_memset(e, 0, sizeof(Entity));
+		e->data = &entityDatabase[ENT_DUMMY];
+	}
+}
+
 void EntityDraw(Entity  *e){
+	if (e->id==0)
+		return;
 	SDL_Point center = { 8, 8 };
 	ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 }
@@ -93,7 +104,7 @@ void EntityAnimate(Entity *e){
 void EntityUpdateAll()
 {
 	Entity *e = 0;
-	for (uint8 i = 0; i < MAX_ENTITIES; ++i)
+	for (unsigned char i = 0; i < MAX_ENTITIES; ++i)
 	{
 		if (entities[i].id == 0) continue;
 
@@ -101,12 +112,13 @@ void EntityUpdateAll()
 		switch (e->data->type)
 		{
 		case TYPE_CREATURE:
+			EntityAnimate(e);
 			switch (e->data->ai) {
 			case AI_CHASE_PLAYER:
-				if (e->pos.x < g_player->pos.x) e->pos.x += 1;
-				if (e->pos.x > g_player->pos.x) e->pos.x -= 1;
-				if (e->pos.y < g_player->pos.y) e->pos.y += 1;
-				if (e->pos.y > g_player->pos.y) e->pos.y -= 1;
+				if (e->pos.x < g_player->pos.x-16) e->pos.x += 1;
+				if (e->pos.x > g_player->pos.x+16) e->pos.x -= 1;
+				if (e->pos.y < g_player->pos.y-16) e->pos.y += 1;
+				if (e->pos.y > g_player->pos.y+16) e->pos.y -= 1;
 				break;
 			}
 			break;
@@ -120,19 +132,80 @@ void EntityDrawAll()
 {
 	Entity *e = 0;
 	SDL_Point center = { 8, 8 };
-	for (uint8 i = 0; i < 32; ++i) {
-		if (entities[i].id == 0) continue;
+	for (unsigned char i = 0; i < MAX_ENTITIES; ++i) {
+		if (entities[i].id < 1)
+			continue;
 		e = &entities[i];
 		ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 	}
 }
 Entity* EntityGetAtPoint(int px, int py) {
 	Entity *e = 0;
-	for (uint16 i = 0; i < 32; ++i) {
+	for (unsigned short i = 0; i < 32; ++i) {
 		if (entities[i].id != 0){
 			//if at the point
 			return e;
 		}
 	}
 	return e;
+}
+
+void EntityMoveWithCollision(Entity* e, int velx, int vely) {
+	int width = e->data->width;
+	int height = e->data->height;
+
+	//X-axis
+	for (int i = 0; i < abs(velx); i++) {
+		int step_x = sign(velx);
+		int next_x = step_x + e->pos.x;
+		int check_x = (step_x > 0) ? next_x + width : next_x;
+		bool ct = LevelIsTileSolid(check_x, e->pos.y);
+		bool cb = LevelIsTileSolid(check_x, e->bottom);
+		if (!ct && !cb) {
+			e->pos.x += step_x;
+			e->right = e->pos.x + width;
+		}
+		else {
+			//Nudge player around tiles
+			if (!ct && cb) {
+				e->pos.y -= 1;
+				e->bottom = e->pos.y + height;
+				break;
+			}
+			else if (ct && !cb) {
+				e->pos.y += 1;
+				e->bottom = e->pos.y + height;
+				break;
+			}
+			break;
+		}
+	}
+
+	// Y-axis
+	for (int i = 0; i < abs(vely); i++) {
+		int step_y = sign(vely);
+		int next_y = step_y + e->pos.y;
+		int check_y = (step_y > 0) ? next_y + height : next_y;
+		bool cl = LevelIsTileSolid(e->pos.x, check_y);
+		bool cr = LevelIsTileSolid(e->right, check_y);
+
+		if (!cl && !cr) {
+			e->pos.y += step_y;
+			e->bottom = e->pos.y + height;
+		}
+		else {
+			//Nudge player around tiles
+			if (!cl && cr) {
+				e->pos.x -= 1;
+				e->right = e->pos.x + width;
+				break;
+			}
+			else if (cl && !cr) {
+				e->pos.x += 1;
+				e->right = e->pos.x + width;
+				break;
+			}
+			break;
+		}
+	}
 }

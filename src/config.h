@@ -7,16 +7,17 @@
 #include <stdint.h>
 
 #define nullptr (void*)0
-#define MAX_KEYS 127
+#define SCALE 3
 #define MAX_TILESHEETS 4
 #define MAX_SOUNDS 8
 #define TILE_SIZE 16
+#define NUM_TILES 256
 
-typedef signed char int8;
-typedef signed short int16;
-typedef signed int int32;
-typedef unsigned char uint8;
-typedef unsigned short uint16;
-typedef unsigned int uint32;
+//typedef signed char int8;
+//typedef signed short int16;
+//typedef signed int int32;
+//typedef unsigned char unsigned char;
+//typedef unsigned short unsigned short;
+//typedef unsigned int uint32;
 
 #endif

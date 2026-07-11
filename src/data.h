@@ -43,7 +43,7 @@ typedef enum {
 } AiType;
 
 // Immutable Data Blueprint (The Flyweight Pattern)
-typedef struct EntityBlueprint{
+struct EntityBlueprint{
     unsigned char type, //player, creature, projectile, decoration, etc... 
         maxHealth,
         damage,			// damage done on touch

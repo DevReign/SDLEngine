@@ -1,7 +1,7 @@
 #include "game.h"
 #include "engine.h"
 #include "entity.h"
-//#include "level.h"
+#include "level.h"
 #include "data.h"
 #include "player.h"
 
@@ -12,20 +12,15 @@ void GameInit(void) {
     EngineInit("Game", 960, 540);//(320, 180, "Game"); (640, 360, "Game");
     //DatabaseInit();
     DatabaseLoadAssets();
-    LevelInit();
+    
     EntityManagerInit();
+    //init player first to be at index[0], so we can clear everything when changing rooms
+    PlayerInit(10, 5);
     // Load initial map data
-    //LevelLoad("0.bin");
+    LevelInit();
 
     // Set state
     currentState = STATE_GAMEPLAY;
-
-    if (currentState == STATE_GAMEPLAY) {
-        //MapLoadRoom(7, 7);
-
-        PlayerInit(8, 8);
-        //Entity* zombie = EntitySpawn(96, 96, ENT_ZOMBIE);
-    } 
 }
 
 void GameUpdate(void) {
@@ -45,21 +40,46 @@ void GameUpdate(void) {
 
     case STATE_GAMEPLAY: {
         // Update Game Objects (AI, Animations, Life Cycles)
-        EntityUpdateAll(); //EntityManagerUpdate();
+        EntityUpdateAll();
 
         //CollisionUpdate();
 
-        // TODO: Check for Room Boundaries (Zelda Edge Detection)
         PlayerUpdate();
 
         if (InputIsKeyPressed(SDLK_p))
         {
-            printf("Debug: %d \n", g_player->pos.x);
-            printf("Debug: %d \n", g_player->pos.y);
+            printf("Debug: %f, %f \n", g_player->pos.x, g_player->pos.y);
+        }
+
+        if (InputIsMousePressed(1)) {
+            int mx, my;
+            mx = 0;
+            my = 0;
+            SDL_GetMouseState(&mx, &my);
+
+            bool s = LevelIsTileSolid((mx + 3 / 2) / 3, (my+3/2) / 3);// g_player->pos.x - OFFSET_X, g_player->pos.y);
+            //printf("solid= %d \n",s);
+        }
+        //change rooms
+        //TODO: refactor and add actual player dimensions later. move to levelupdate?
+        if (g_player->pos.x < 1){
+            LevelSelectRoom(LevelFindAdjectId(3));
+            g_player->pos.x = CHUNK_WIDTH * 16 - 18;
+        }
+        else if (g_player->pos.x+16 > CHUNK_WIDTH*16-2){
+            LevelSelectRoom(LevelFindAdjectId(1));
+            g_player->pos.x = 2;
+        }
+        else if (g_player->pos.y+16 > CHUNK_HEIGHT * 16-2){
+            LevelSelectRoom(LevelFindAdjectId(2));
+            g_player->pos.y = 2;
+        }
+        else if (g_player->pos.y < 1){
+            LevelSelectRoom(LevelFindAdjectId(0));
+            g_player->pos.y = CHUNK_HEIGHT * 16 - 18;
         }
     }
         
-
     case STATE_GAMEOVER:
         if (InputIsKeyPressed(SDL_SCANCODE_R)) {
             GameInit(); // reset
@@ -72,19 +92,12 @@ void GameDraw(void) {
     switch (currentState) {
     case STATE_TITLE:
         // Draw title background image or text
-        ImageDrawText(64, 80, TEX_GUI, "ZELDA MVP CLONE");
-        ImageDrawText(48, 120, TEX_GUI, "PRESS ENTER TO START");
+        ImageDrawText(64, 80, TEX_GUI, "Demon Knight");
+        ImageDrawText(48, 120, TEX_GUI, "Press Enter to Start");
         break;
 
     case STATE_GAMEPLAY:
-        //draw map
-        for (uint16 r = 0; r < 12; ++r)
-        {
-            for (uint16 c = 0; c < 20; ++c)
-            {
-                ImageDrawTile(c * 16, r * 16, TEX_ATLAS, 68);
-            }
-        }
+
         LevelDraw();
         //LevelDrawBackground();  // Layer 1 - Floors, Paths, Water
         EntityDrawAll();          // Layer 2 - Player, Enemies, Items (Y-Sorted?)
@@ -92,7 +105,7 @@ void GameDraw(void) {
         //HUDDraw();              // Layer 4 - UI
         
         //Font test
-        ImageDrawText(0, 0, TEX_GUI, "Testing ImageDrawText()!");
+        ImageDrawText(0, 152, TEX_GUI, "Testing ImageDrawText()!");
         break;
 
     case STATE_GAMEOVER:
