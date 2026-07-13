@@ -8,8 +8,15 @@
 
 #define MAX_PROJECTILES 64
 
+typedef enum {
+	FACTION_ENEMY=0,
+	FACTION_PLAYER,
+	FACTION_NEUTRAL
+} Faction;
+
 typedef struct {
 	bool active;
+	Faction faction;
 	int width, height, spriteId, damage, fxId, sfxId;
 	float x, y,vx ,vy;
 	//int sourceX, sourceY; //for specific texture atlast coordinates
@@ -18,6 +25,6 @@ typedef struct {
 Projectile* ProjectileGetPool(void);
 int ProjectileGetActiveCount(void);
 void ProjectileInit();
-void ProjectileSpawn(int x, int y, int vx, int vy, );
-void ProjectileDestroy();
+void ProjectileSpawn(float x, float y, float vx, float vy, unsigned int type, Faction f);
+void ProjectileDestroy(int index);
 #endif

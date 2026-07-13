@@ -15,3 +15,10 @@ int ProjectileGetActiveCount(void) {
 void ProjectileInit() {
 	SDL_memset(projectiles, 0, MAX_PROJECTILES);
 }
+
+void ProjectileSpawn(float x, float y, float vx, float vy, unsigned int type, Faction f) {
+
+}
+void ProjectileDestroy(int index) {
+
+}

@@ -338,7 +338,14 @@ class LevelEditor:
                 elif event.key == pygame.K_l:
                     self.level.Load("0.bin")
                     self.Log("Loaded level 0.bin")
-                    
+                elif event.key == pygame.K_r:
+                    #replace all
+                    tid = self.level.GetId(self.gridX, self.gridY)
+                    for r in range(self.level.chunkHeight):
+                        for c in range(self.level.chunkWidth):
+                            if(self.level.GetId(c, r)==tid):
+                                self.level.SetId(c, r, self.selectedTile)
+                        
                     
     def Update(self):
         # Continuous inputs go here
@@ -367,7 +374,7 @@ class LevelEditor:
 
 if __name__ == "__main__":
     window = Window()
-    atlas = LoadTilesheet("data/atlas.png", 16)
+    atlas = LoadTilesheet("images/atlas.bmp", 16)
     canvas = window.GetSurface()
     lvl = Level()
     lvled = LevelEditor(window, atlas, lvl)

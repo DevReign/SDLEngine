@@ -5,7 +5,7 @@
 #include "audio.h"
 #include "vector.h"
 
-// Texture slot mappings for the Image module
+// Texture slot mappings for the Image module, prob remove for 1 2048 texture atlas
 typedef enum {
     TEX_ATLAS = 0,
     TEX_GUI,
@@ -18,7 +18,7 @@ typedef enum {
     SND_COUNT
 } SoundID;
 
-// Blueprint database indices
+// Entity blueprint database indices
 typedef enum {
     ENT_DUMMY = 0,
     ENT_PLAYER,
@@ -35,7 +35,7 @@ typedef enum {
     TYPE_COUNT
 } EntityType;
 
-// AI Routine indices
+// AI indices
 typedef enum {
     AI_NONE = 0,
     AI_CHASE_PLAYER,

@@ -63,6 +63,7 @@ void EntityClearAll() {
 		SDL_memset(e, 0, sizeof(Entity));
 		e->data = &entityDatabase[ENT_DUMMY];
 	}
+	entityCount = 1;
 }
 
 void EntityDraw(Entity  *e){
