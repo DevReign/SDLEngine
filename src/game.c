@@ -4,6 +4,7 @@
 #include "level.h"
 #include "data.h"
 #include "player.h"
+#include "projectile.h"
 
 static GameState currentState = STATE_TITLE;
 
@@ -42,6 +43,11 @@ void GameUpdate(void) {
         // Update Game Objects (AI, Animations, Life Cycles)
         EntityUpdateAll();
 
+        //update projectiles
+        for (int i = 0; i < ProjectileGetActiveCount(); i++){
+            Projectile* p = ProjectileUpdate(i);
+        }
+
         //CollisionUpdate();
 
         PlayerUpdate();
@@ -49,6 +55,10 @@ void GameUpdate(void) {
         if (InputIsKeyPressed(SDLK_p))
         {
             printf("Debug: %f, %f \n", g_player->pos.x, g_player->pos.y);
+            Vec2 p;
+            p.x = 1;
+            p.y = 0;
+            ProjectileSpawn(g_player->pos, p, 0, FACTION_PLAYER);
         }
 
         if (InputIsMousePressed(1)) {
@@ -101,6 +111,7 @@ void GameDraw(void) {
         LevelDraw();
         //LevelDrawBackground();  // Layer 1 - Floors, Paths, Water
         EntityDrawAll();          // Layer 2 - Player, Enemies, Items (Y-Sorted?)
+        ProjectileDrawAll();
         //LevelDrawForeground();  // Layer 3 - Overhead door frames, tree tops
         //HUDDraw();              // Layer 4 - UI
         

@@ -5,9 +5,14 @@
 static Projectile projectiles[MAX_PROJECTILES];
 static activeCount = 0;
 
+static Projectile projectileDatabase[PROJ_COUNT] = {
+	{.faction = FACTION_ENEMY, .width = 15, .height = 15, .spriteId = 0, .vfxId = 0, .sfxId = 0 }
+};
+
 Projectile* ProjectileGetPool(void) {
 	return projectiles;
 }
+
 int ProjectileGetActiveCount(void) {
 	return activeCount;
 }
@@ -16,9 +21,33 @@ void ProjectileInit() {
 	SDL_memset(projectiles, 0, MAX_PROJECTILES);
 }
 
-void ProjectileSpawn(float x, float y, float vx, float vy, unsigned int type, Faction f) {
-
+void ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f) {
+	if (activeCount < MAX_PROJECTILES) {
+		//projectiles[activeCount] = projectileDatabase[type];
+		Projectile* p = &projectiles[activeCount];
+		*p = projectileDatabase[type];
+		p->active = true;
+		p->faction = f;
+		p->pos.x = pos.x+8;//spawn at center, switch to w&h later
+		p->pos.y = pos.y+8;
+		p->vel = vel;
+		activeCount++;
+	}
 }
-void ProjectileDestroy(int index) {
 
+void ProjectileDestroy(int i) {
+	if (i >= 0 && i < activeCount)
+		activeCount--;
+		projectiles[i] = projectiles[activeCount];
+		projectiles[activeCount].active = false;
+}
+Projectile* ProjectileUpdate(int i) {
+	projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);
+	return &projectiles[i];
+}
+void ProjectileDrawAll(void) {
+	for (int i = 0; i < activeCount; i++) {
+		Projectile* p = &projectiles[i];
+		ImageDrawTile(p->pos.x, p->pos.y, TEX_ATLAS, p->spriteId);
+	}
 }
