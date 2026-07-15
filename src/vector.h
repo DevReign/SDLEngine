@@ -10,6 +10,8 @@ typedef struct {
     float y;
 } Vec2;
 
+Vec2 Vec2Create(int x, int y);
+
 // Standard algebraic operations
 Vec2  Vec2Add(Vec2 a, Vec2 b);
 Vec2  Vec2Sub(Vec2 a, Vec2 b);

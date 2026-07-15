@@ -151,13 +151,13 @@ Entity* EntityGetAtPoint(int px, int py) {
 	return e;
 }
 
-void EntityMoveWithCollision(Entity* e, int velx, int vely) {
+void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 	int width = e->data->width;
 	int height = e->data->height;
 
 	//X-axis
-	for (int i = 0; i < abs(velx); i++) {
-		int step_x = sign(velx);
+	for (int i = 0; i < abs(vel.x); i++) {
+		int step_x = sign(vel.x);
 		int next_x = step_x + e->pos.x;
 		int check_x = (step_x > 0) ? next_x + width : next_x;
 		bool ct = LevelIsTileSolid(check_x, e->pos.y);
@@ -183,8 +183,8 @@ void EntityMoveWithCollision(Entity* e, int velx, int vely) {
 	}
 
 	// Y-axis
-	for (int i = 0; i < abs(vely); i++) {
-		int step_y = sign(vely);
+	for (int i = 0; i < abs(vel.y); i++) {
+		int step_y = sign(vel.y);
 		int next_y = step_y + e->pos.y;
 		int check_y = (step_y > 0) ? next_y + height : next_y;
 		bool cl = LevelIsTileSolid(e->pos.x, check_y);

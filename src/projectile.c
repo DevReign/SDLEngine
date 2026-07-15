@@ -28,8 +28,8 @@ void ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f) {
 		*p = projectileDatabase[type];
 		p->active = true;
 		p->faction = f;
-		p->pos.x = pos.x+8;//spawn at center, switch to w&h later
-		p->pos.y = pos.y+8;
+		p->pos.x = pos.x;
+		p->pos.y = pos.y;
 		p->vel = vel;
 		activeCount++;
 	}
@@ -42,6 +42,10 @@ void ProjectileDestroy(int i) {
 		projectiles[activeCount].active = false;
 }
 Projectile* ProjectileUpdate(int i) {
+	if (projectiles[i].pos.x > 256 || projectiles[i].pos.x < 0 || projectiles[i].pos.y > 240 || projectiles[i].pos.y < 0) {
+		ProjectileDestroy(i);
+		return nullptr;
+	}
 	projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);
 	return &projectiles[i];
 }

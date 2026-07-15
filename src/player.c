@@ -15,33 +15,36 @@ void PlayerInit(int gridX, int gridY) {
 
 void PlayerUpdate(void) {
     if (g_player == NULL || g_player->id == 0) return;
-    int x = 0;
-    int y = 0;
-    if (InputIsKeyHeld(SDLK_a))
-    {
-        x = -1;
+    Vec2 dir;
+    dir.x = 0;
+    dir.y = 0;
+
+    if (InputIsKeyHeld(SDLK_a)){
+        dir.x = -1;
         g_player->direction = 90;
-        EntityAnimate(g_player);
+        //EntityAnimate(g_player);
     }
-    if (InputIsKeyHeld(SDLK_d))
-    {
-        x = 1;
+    if (InputIsKeyHeld(SDLK_d)){
+        dir.x = 1;
         g_player->direction = 270;
-        EntityAnimate(g_player);
+        //EntityAnimate(g_player);
     }
-    if (InputIsKeyHeld(SDLK_w))
-    {
-        y = -1;
+    if (InputIsKeyHeld(SDLK_w)){
+        dir.y = -1;
         g_player->direction = 180;
-        EntityAnimate(g_player);
+        //EntityAnimate(g_player);
     }
-    if (InputIsKeyHeld(SDLK_s))
-    {
-        y = 1;
+    if (InputIsKeyHeld(SDLK_s)){
+        dir.y = 1;
         g_player->direction = 0;
-        EntityAnimate(g_player);
+        //EntityAnimate(g_player);
     }
-    EntityMoveWithCollision(g_player,x,y);
+
+    //save last direction for attacks
+    if(dir.x > 0 && dir.y > 0)
+        g_player->lastDir = dir;
+
+    EntityMoveWithCollision(g_player,dir);
 
     if (InputIsKeyPressed(SDLK_SPACE)) {
     }

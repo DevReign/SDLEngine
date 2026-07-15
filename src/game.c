@@ -55,10 +55,7 @@ void GameUpdate(void) {
         if (InputIsKeyPressed(SDLK_p))
         {
             printf("Debug: %f, %f \n", g_player->pos.x, g_player->pos.y);
-            Vec2 p;
-            p.x = 1;
-            p.y = 0;
-            ProjectileSpawn(g_player->pos, p, 0, FACTION_PLAYER);
+            ProjectileSpawn(g_player->pos, g_player->lastDir, 0, FACTION_PLAYER);
         }
 
         if (InputIsMousePressed(1)) {

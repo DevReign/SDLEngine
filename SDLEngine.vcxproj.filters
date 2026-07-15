@@ -60,14 +60,14 @@
     <ClCompile Include="src\level.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vector.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\hud.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\projectile.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vector.c">
+      <Filter>Source Files\wrappers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,14 +110,14 @@
     <ClInclude Include="src\level.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\vector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\hud.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\projectile.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vector.h">
+      <Filter>Header Files\weappers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

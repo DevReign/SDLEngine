@@ -4,21 +4,21 @@
 #include "engine.h"
 #include "data.h"
 
-#define MAX_ENTITIES 64
+#define MAX_ENTITIES 32
 #define GET_CENTER_X ((Entity).x + ((Entity).width/2))
 #define GET_CENTER_Y ((Entity).y + ((Entity).height/2))
 
 typedef struct tagEntity{
 	unsigned short id; //unique entity id
 	unsigned short health;
-	Vec2 pos;
+	Vec2 pos, vel, lastDir;
 	struct EntityBlueprint *data;
 	bool invulnerable;
 	bool playingAnim;
 	unsigned char state;
 	unsigned short frame, direction;
 	float attackTimer, animTimer, flinchTimer;
-	signed int x, y, right, bottom;
+	int right, bottom;
 } Entity;
 
 extern Entity* g_player;
@@ -35,6 +35,6 @@ void EntityClearAll();
 void EntityUpdateAll();
 void EntityDrawAll();
 //void EntityQuit() {};
-void EntityMoveWithCollision(Entity* e, int velx, int vely);
+void EntityMoveWithCollision(Entity* e, Vec2 vel);
 
 #endif

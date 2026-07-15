@@ -1,5 +1,12 @@
 #include "vector.h"
 
+Vec2 Vec2Create(int x, int y) {
+    Vec2 v;
+    v.x = x;
+    v.y = y;
+    return v;
+}
+
 Vec2 Vec2Add(Vec2 a, Vec2 b) {
     Vec2 result = { a.x + b.x, a.y + b.y };
     return result;
