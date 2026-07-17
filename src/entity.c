@@ -3,7 +3,7 @@
 
 static Entity entities[MAX_ENTITIES] = { 0 };//static Entity *entityPool[64] = { 0 };
 static unsigned short entityCount = 0;
-
+static unsigned short activeCount = 0;
 Entity* g_player = NULL;
 extern struct EntityBlueprint entityDatabase[ENT_COUNT];
 
@@ -23,52 +23,52 @@ void EntityManagerInit() {
 }
 
 Entity* EntitySpawn(int x, int y, unsigned int eid) {
-	//struct EntityBlueprint* dummyData = &entityDatabase[ENT_DUMMY];
 	struct EntityBlueprint* spawnData = &entityDatabase[eid];
 
-	for (int i = 0; i < MAX_ENTITIES; i++) {
-		// check for the dummy blueprint
-		if (entities[i].id == 0) {
-			Entity* ent = &entities[i];
+	if (activeCount < MAX_ENTITIES) {
+		Entity* ent = &entities[activeCount];
+		printf("debug %d \n", activeCount);
+		// Wipe instance data block
+		SDL_memset(ent, 0, sizeof(Entity));
 
-			// Wipe instance data block
-			SDL_memset(ent, 0, sizeof(Entity));
-
-			// Binds spawn properties
-			ent->data = spawnData;
-			ent->pos.x = x;
-			ent->pos.y = y;
-			ent->health = spawnData->maxHealth;
-			ent->frame = spawnData->frameStart;
-			ent->id = ++entityCount;
-			ent->animTimer = 0.14f;
-
-			return ent;
-		}
+		// Binds spawn properties
+		ent->data = spawnData;
+		ent->pos.x = x;
+		ent->pos.y = y;
+		ent->health = spawnData->maxHealth;
+		ent->frame = spawnData->frameStart;
+		ent->id = ++entityCount;
+		ent->animTimer = 0.14f;
+		ent->active = true;
+		activeCount++;
+		return ent;
 	}
-	return 0;
+	return nullptr;
 }
 
 
-void EntityKill(Entity *e){
-	if (e == NULL) return;
-	SDL_memset(e, 0, sizeof(Entity));
-	e->data = &entityDatabase[ENT_DUMMY];
+void EntityKill(int id){
+	for (int i = 0; i < activeCount; i++){
+		if (entities[i].id == id) {
+			entities[i] = entities[activeCount - 1];
+			activeCount--;
+		}
+	}
+	//SDL_memset(e, 0, sizeof(Entity));
 }
 
 //Don't clear player, so start at 1
 void EntityClearAll() {
-	for (int i = 1; i < MAX_ENTITIES; i++) {
-		Entity* e = &entities[i];
-		SDL_memset(e, 0, sizeof(Entity));
-		e->data = &entityDatabase[ENT_DUMMY];
+	for (int i = 1; i < activeCount; i++) {
+		entities[i].active = false;
+		//e->data = &entityDatabase[ENT_DUMMY];
 	}
-	entityCount = 1;
+	//start at 1 because player is at 0
+	//entityCount = 1;
+	activeCount = 1;
 }
 
 void EntityDraw(Entity  *e){
-	if (e->id==0)
-		return;
 	SDL_Point center = { 8, 8 };
 	ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 }
@@ -102,14 +102,10 @@ void EntityAnimate(Entity *e){
 	}
 }
 
-void EntityUpdateAll()
-{
-	Entity *e = 0;
-	for (unsigned char i = 0; i < MAX_ENTITIES; ++i)
-	{
-		if (entities[i].id == 0) continue;
-
-		e = &entities[i];
+void EntityUpdateAll(){
+	for (unsigned char i = 0; i < activeCount; ++i){
+		if (!entities[i].active) break;
+		Entity* e = &entities[i];
 		switch (e->data->type)
 		{
 		case TYPE_CREATURE:
@@ -133,9 +129,8 @@ void EntityDrawAll()
 {
 	Entity *e = 0;
 	SDL_Point center = { 8, 8 };
-	for (unsigned char i = 0; i < MAX_ENTITIES; ++i) {
-		if (entities[i].id < 1)
-			continue;
+	for (unsigned char i = 0; i < activeCount; ++i) {
+		if (!entities[i].active) break;
 		e = &entities[i];
 		ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 	}

@@ -23,4 +23,5 @@ void LevelDraw();
 short LevelInit();
 short LevelFindAdjectId(short dir);
 bool LevelIsTileSolid(int x, int y);
+short LevelGetTileId(int x, int y);
 #endif

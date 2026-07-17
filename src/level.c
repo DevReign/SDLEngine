@@ -71,6 +71,7 @@ void LevelDraw() {
         }
     }
 }
+
 bool LevelIsTileSolid(int x, int y) {
     int c = x >> 4;
     int r = y >> 4;
@@ -78,6 +79,15 @@ bool LevelIsTileSolid(int x, int y) {
     int offset = chunkId * CHUNK_SIZE;
     return solidTiles[tileData[local_id + offset]];
 }
+
+short LevelGetTileId(int x, int y) {
+    int c = x >> 4;
+    int r = y >> 4;
+    int local_id = r * CHUNK_WIDTH + c;
+    int offset = chunkId * CHUNK_SIZE;
+    return tileData[local_id + offset];
+}
+
 short LevelInit() {
     SDL_memset(tileData, 0, ARRAY_SIZE);
     SDL_memset(objectData, 0, ARRAY_SIZE);
@@ -85,6 +95,10 @@ short LevelInit() {
     LevelLoad("0.bin");
     LevelSelectRoom(0);
 
-    //load tile properties
+    //load tile properties - from file later 
+    solidTiles[1] = true;
+    solidTiles[2] = true;
     solidTiles[79] = true;
+    solidTiles[148] = true;
+    solidTiles[149] = true;
 }

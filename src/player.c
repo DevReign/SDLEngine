@@ -41,12 +41,13 @@ void PlayerUpdate(void) {
     }
 
     //save last direction for attacks
-    if(dir.x > 0 && dir.y > 0)
+    if(dir.x != 0 || dir.y != 0)
         g_player->lastDir = dir;
 
     EntityMoveWithCollision(g_player,dir);
 
     if (InputIsKeyPressed(SDLK_SPACE)) {
+        ProjectileSpawn(g_player->pos, g_player->lastDir, PROJ_BULLET, FACTION_PLAYER);
     }
 
 }

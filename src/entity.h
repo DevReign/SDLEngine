@@ -8,13 +8,12 @@
 #define GET_CENTER_X ((Entity).x + ((Entity).width/2))
 #define GET_CENTER_Y ((Entity).y + ((Entity).height/2))
 
-typedef struct tagEntity{
+typedef struct{
 	unsigned short id; //unique entity id
 	unsigned short health;
 	Vec2 pos, vel, lastDir;
 	struct EntityBlueprint *data;
-	bool invulnerable;
-	bool playingAnim;
+	bool active, invulnerable, playingAnim;
 	unsigned char state;
 	unsigned short frame, direction;
 	float attackTimer, animTimer, flinchTimer;
@@ -30,7 +29,7 @@ void EntitySetPos(Entity *e, int px, int py);
 void EntityAnimate(Entity* e);
 //bool EntityCollide();
 Entity *EntitySpawn(int x, int y, unsigned int eid);
-void EntityKill(Entity *e);
+void EntityKill(int id);
 void EntityClearAll();
 void EntityUpdateAll();
 void EntityDrawAll();

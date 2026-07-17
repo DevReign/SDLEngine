@@ -55,7 +55,6 @@ void GameUpdate(void) {
         if (InputIsKeyPressed(SDLK_p))
         {
             printf("Debug: %f, %f \n", g_player->pos.x, g_player->pos.y);
-            ProjectileSpawn(g_player->pos, g_player->lastDir, 0, FACTION_PLAYER);
         }
 
         if (InputIsMousePressed(1)) {
@@ -63,9 +62,7 @@ void GameUpdate(void) {
             mx = 0;
             my = 0;
             SDL_GetMouseState(&mx, &my);
-
-            bool s = LevelIsTileSolid((mx + 3 / 2) / 3, (my+3/2) / 3);// g_player->pos.x - OFFSET_X, g_player->pos.y);
-            //printf("solid= %d \n",s);
+            printf("solid= %d \n", LevelGetTileId((mx + 3 / 2) / 3, (my + 3 / 2) / 3));
         }
         //change rooms
         //TODO: refactor and add actual player dimensions later. move to levelupdate?

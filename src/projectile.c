@@ -47,6 +47,8 @@ Projectile* ProjectileUpdate(int i) {
 		return nullptr;
 	}
 	projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);
+
+
 	return &projectiles[i];
 }
 void ProjectileDrawAll(void) {
