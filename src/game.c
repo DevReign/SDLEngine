@@ -47,13 +47,12 @@ void GameUpdate(void) {
         for (int i = 0; i < ProjectileGetActiveCount(); i++){
             Projectile* p = ProjectileUpdate(i);
         }
-
+        ProjectileCheckCollisions();
         //CollisionUpdate();
 
         PlayerUpdate();
 
-        if (InputIsKeyPressed(SDLK_p))
-        {
+        if (InputIsKeyPressed(SDLK_p)){
             printf("Debug: %f, %f \n", g_player->pos.x, g_player->pos.y);
         }
 

@@ -54,18 +54,38 @@ void EntityKill(int id){
 			activeCount--;
 		}
 	}
-	//SDL_memset(e, 0, sizeof(Entity));
 }
 
-//Don't clear player, so start at 1
 void EntityClearAll() {
+	//Don't clear player, so start at 1
 	for (int i = 1; i < activeCount; i++) {
 		entities[i].active = false;
-		//e->data = &entityDatabase[ENT_DUMMY];
 	}
-	//start at 1 because player is at 0
-	//entityCount = 1;
 	activeCount = 1;
+}
+
+unsigned int EntityGetActiveCount() {
+	return activeCount;
+}
+
+Entity* EntityCheckCollisionByRadius(Vec2 v, int r) {
+	for (int i = 0; i < activeCount; i++) {
+		unsigned char ent_r = entities[i].data->radius;
+		float dx = entities[i].pos.x - v.x;
+		float dy = entities[i].pos.y - v.y;
+		float dist = dx + dy;
+		unsigned short radius = ent_r + r;
+		if ((dist * dist) < (radius* radius))
+			return &entities[i];
+	}
+	return nullptr;
+}
+
+Entity* EntityGetById(int id) {
+	for (int i = 0; i < activeCount; i++) {
+		if (entities[i].id == id)
+			return &entities[i];
+	}
 }
 
 void EntityDraw(Entity  *e){
@@ -87,13 +107,11 @@ void EntityAnimate(Entity *e){
 	e->animTimer -= (float)ClockGetDeltaTime();
 	int lastFrame = (e->data->frameStart + e->data->numFrames) - 1;
 
-	if (e->frame < e->data->frameStart || e->frame > lastFrame)
-	{
+	if (e->frame < e->data->frameStart || e->frame > lastFrame){
 		e->frame = e->data->frameStart;
 		e->animTimer = 0.14;
 	}
-	if (e->animTimer < 0)
-	{
+	if (e->animTimer < 0){
 		e->animTimer += 0.14; // Add animation rate to entity data
 		if (e->frame < lastFrame)
 			e->frame += 1;
@@ -106,8 +124,7 @@ void EntityUpdateAll(){
 	for (unsigned char i = 0; i < activeCount; ++i){
 		if (!entities[i].active) break;
 		Entity* e = &entities[i];
-		switch (e->data->type)
-		{
+		switch (e->data->type){
 		case TYPE_CREATURE:
 			EntityAnimate(e);
 			switch (e->data->ai) {

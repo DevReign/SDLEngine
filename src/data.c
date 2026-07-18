@@ -17,23 +17,23 @@ void DatabaseLoadAssets(void) {
 struct EntityBlueprint entityDatabase[ENT_COUNT] = {
     // ENT_DUMMY
     {
-        .type = TYPE_STATIC, .ai = AI_NONE,
+        .type = TYPE_STATIC, .ai = AI_NONE, .faction = FACTION_NEUTRAL,
         .maxHealth = 0, .touchDamage = 0, .speed = 0,
-        .width = 16, .height = 16, .rotateSprite = false,
+        .width = 16, .height = 16, .radius = 8, .rotateSprite = false,
         .projectileId = 0, .frameStart = 0, .frameAttack = 0, .numFrames = 0, .animRate = 0.0f
     },
     // ENT_PLAYER
     {
-        .type = TYPE_CREATURE, .ai = AI_NONE,
+        .type = TYPE_CREATURE, .ai = AI_NONE, .faction = FACTION_PLAYER,
         .maxHealth = 100, .touchDamage = 0, .speed = 1,
-        .width = 15, .height = 15, .rotateSprite = false, // Slightly smaller hitbox for forgiving collisions
+        .width = 15, .height = 15, .radius = 8, .rotateSprite = false, // Slightly smaller hitbox for forgiving collisions
         .projectileId = 0, .frameStart = 320, .frameAttack = 8, .numFrames = 4, .animRate = 0.12f
     },
     // ENT_ZOMBIE
     {
-        .type = TYPE_CREATURE, .ai = AI_CHASE_PLAYER,
+        .type = TYPE_CREATURE, .ai = AI_CHASE_PLAYER,.faction = FACTION_ENEMY,
         .maxHealth = 30, .touchDamage = 10, .speed = 1,
-        .width = 15, .height = 15, .rotateSprite = false,
+        .width = 15, .height = 15, .radius = 8, .rotateSprite = false,
         .projectileId = 0, .frameStart = 484, .frameAttack = 16, .numFrames = 4, .animRate = 0.16f
     },
 };

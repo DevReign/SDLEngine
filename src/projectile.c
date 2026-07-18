@@ -6,7 +6,7 @@ static Projectile projectiles[MAX_PROJECTILES];
 static activeCount = 0;
 
 static Projectile projectileDatabase[PROJ_COUNT] = {
-	{.faction = FACTION_ENEMY, .width = 15, .height = 15, .spriteId = 0, .vfxId = 0, .sfxId = 0 }
+	{.faction = FACTION_ENEMY, .radius = 8, .spriteId = 0, .vfxId = 0, .sfxId = 0 }
 };
 
 Projectile* ProjectileGetPool(void) {
@@ -41,19 +41,39 @@ void ProjectileDestroy(int i) {
 		projectiles[i] = projectiles[activeCount];
 		projectiles[activeCount].active = false;
 }
+
 Projectile* ProjectileUpdate(int i) {
-	if (projectiles[i].pos.x > 256 || projectiles[i].pos.x < 0 || projectiles[i].pos.y > 240 || projectiles[i].pos.y < 0) {
+	if (projectiles[i].pos.x > 256 || projectiles[i].pos.x < -16 || projectiles[i].pos.y > 240 || projectiles[i].pos.y < 0) {
 		ProjectileDestroy(i);
 		return nullptr;
 	}
 	projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);
 
-
 	return &projectiles[i];
 }
+
 void ProjectileDrawAll(void) {
 	for (int i = 0; i < activeCount; i++) {
 		Projectile* p = &projectiles[i];
 		ImageDrawTile(p->pos.x, p->pos.y, TEX_ATLAS, p->spriteId);
+	}
+}
+
+void ProjectileCheckCollisions() {
+	for (int i = 0; i < activeCount; i++) {
+		Projectile* p = &projectiles[i];
+		for (int t = 0; t < CHUNK_SIZE; t++){
+			if (LevelIsTileSolid(p->pos.x, p->pos.y)){
+				ProjectileDestroy(i);
+			}
+		}
+		for (int e = 0; e < EntityGetActiveCount(); e++){
+			Entity* ent = EntityCheckCollisionByRadius(p->pos, p->radius);
+			if (ent!=nullptr){
+				if (p->faction != ent->data->faction)
+					ent->health -= p->damage;
+					ProjectileDestroy(i);
+			}
+		}
 	}
 }

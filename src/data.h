@@ -42,6 +42,12 @@ typedef enum {
     AI_RANDOM_WANDER
 } AiType;
 
+typedef enum {
+    FACTION_ENEMY = 0,
+    FACTION_PLAYER,
+    FACTION_NEUTRAL
+} Faction;
+
 // Immutable Data Blueprint (The Flyweight Pattern)
 struct EntityBlueprint{
     unsigned char type, //player, creature, projectile, decoration, etc... 
@@ -52,9 +58,8 @@ struct EntityBlueprint{
         ai,				// Ai this entity has, if any. 
         width,			//size for collision. maybe in 8x8 tiles instead of pixels?
         height,
+        radius,
         touchDamage;
-		//originX,		// everything will have center origin, so not needed? 
-		//originY,
 		//interactable,	// if this can be activated, not needed if interactable type?
 	bool rotateSprite;	// bool: Should the sprite rotate based on the entity direction? 
 	unsigned short projectileId, //if the ai tries to spawn a projectile it'll use this 
@@ -63,6 +68,7 @@ struct EntityBlueprint{
 		frameOffset,	// optional -> can offset all frames to be something else or fix position on tilesheet
 		numFrames;      // number of frames to cycle through from idle to show walking or play an idle animation
     float animRate;     // Time interval between animation steps
+    Faction faction;
 };
 
 void DatabaseLoadAssets(void);

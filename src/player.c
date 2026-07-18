@@ -19,29 +19,31 @@ void PlayerUpdate(void) {
     dir.x = 0;
     dir.y = 0;
 
+    //TODO: make it so most recent direction overrides last using a queue
     if (InputIsKeyHeld(SDLK_a)){
         dir.x = -1;
         g_player->direction = 90;
         //EntityAnimate(g_player);
     }
-    if (InputIsKeyHeld(SDLK_d)){
+    else if (InputIsKeyHeld(SDLK_d)){
         dir.x = 1;
         g_player->direction = 270;
         //EntityAnimate(g_player);
     }
-    if (InputIsKeyHeld(SDLK_w)){
+    else if (InputIsKeyHeld(SDLK_w)){
         dir.y = -1;
         g_player->direction = 180;
         //EntityAnimate(g_player);
     }
-    if (InputIsKeyHeld(SDLK_s)){
+    else if (InputIsKeyHeld(SDLK_s)){
         dir.y = 1;
         g_player->direction = 0;
         //EntityAnimate(g_player);
     }
 
     //save last direction for attacks
-    if(dir.x != 0 || dir.y != 0)
+    //TODO: maintain aim direction for attacks while button is held
+    if(dir.x != 0 || dir.y != 0)// && !InputIsKeyHeld(SDLK_SPACE))
         g_player->lastDir = dir;
 
     EntityMoveWithCollision(g_player,dir);

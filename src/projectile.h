@@ -6,14 +6,9 @@
 #include <stdbool.h>
 #include "config.h"
 #include "vector.h"
+#include "data.h"
 
 #define MAX_PROJECTILES 64
-
-typedef enum {
-	FACTION_ENEMY=0,
-	FACTION_PLAYER,
-	FACTION_NEUTRAL
-} Faction;
 
 typedef enum {
 	PROJ_BULLET = 0,
@@ -22,11 +17,10 @@ typedef enum {
 
 typedef struct {
 	bool active;
+	unsigned char radius, damage, vfxId, sfxId;//width, height,
 	Faction faction;
-	int width, height, spriteId, damage, vfxId, sfxId;
 	Vec2 pos, vel;
-	//float vx ,vy;
-	//int sourceX, sourceY; //for specific texture atlast coordinates
+	int spriteId; //sourceX, sourceY; //for specific texture atlast coordinates
 }Projectile;
 
 Projectile* ProjectileGetPool(void);
@@ -36,4 +30,5 @@ void ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f);
 void ProjectileDestroy(int index);
 Projectile* ProjectileUpdate(int i);
 void ProjectileDrawAll(void);
+void ProjectileCheckCollisions();
 #endif
