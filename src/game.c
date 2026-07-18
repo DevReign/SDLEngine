@@ -44,11 +44,28 @@ void GameUpdate(void) {
         EntityUpdateAll();
 
         //update projectiles
-        for (int i = 0; i < ProjectileGetActiveCount(); i++){
-            Projectile* p = ProjectileUpdate(i);
+        ProjectileUpdateAll();
+        
+        //Check collision for projectiles
+        Projectile* proj_pool = ProjectileGetPool();
+        for (int i = 0; i < ProjectileGetActiveCount(); i++) {
+            Projectile* p = &proj_pool[i];
+            for (int t = 0; t < CHUNK_SIZE; t++) {
+                if (LevelIsTileSolid(p->pos.x+8, p->pos.y+8)) {
+                    ProjectileDestroy(i);
+                }
+            }
+            for (int e = 0; e < EntityGetActiveCount(); e++) {
+                Entity* ent = EntityCheckCollisionByRadius(p->pos, p->radius);
+                if (ent != nullptr) {
+                    if (p->faction != ent->data->faction){
+                        ent->health -= p->damage;
+                        ProjectileDestroy(i);
+                    }
+                }
+            }
         }
-        ProjectileCheckCollisions();
-        //CollisionUpdate();
+        
 
         PlayerUpdate();
 

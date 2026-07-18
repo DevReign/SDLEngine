@@ -26,9 +26,8 @@ typedef struct {
 Projectile* ProjectileGetPool(void);
 int ProjectileGetActiveCount(void);
 void ProjectileInit();
-void ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f);
+Projectile * ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f);
 void ProjectileDestroy(int index);
-Projectile* ProjectileUpdate(int i);
+void ProjectileUpdateAll(void);
 void ProjectileDrawAll(void);
-void ProjectileCheckCollisions();
 #endif
