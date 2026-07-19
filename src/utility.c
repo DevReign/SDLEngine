@@ -1,9 +1,6 @@
 #include "utility.h"
 
-bool IsPointInRect()
-{
-
-}
+//bool IsPointInRect(){}
 
 void UtilStringCopy(char* dest, const char* src, size_t dest_size) {
 	if (dest_size == 0) return;

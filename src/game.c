@@ -42,7 +42,6 @@ void GameUpdate(void) {
     case STATE_GAMEPLAY: {
         // Update Game Objects (AI, Animations, Life Cycles)
         EntityUpdateAll();
-
         //update projectiles
         ProjectileUpdateAll();
         
@@ -51,7 +50,7 @@ void GameUpdate(void) {
         for (int i = 0; i < ProjectileGetActiveCount(); i++) {
             Projectile* p = &proj_pool[i];
             for (int t = 0; t < CHUNK_SIZE; t++) {
-                if (LevelIsTileSolid(p->pos.x+8, p->pos.y+8)) {
+                if (LevelIsTileSolid(p->pos.x+p->radius, p->pos.y+ p->radius)) {
                     ProjectileDestroy(i);
                 }
             }
@@ -66,7 +65,6 @@ void GameUpdate(void) {
             }
         }
         
-
         PlayerUpdate();
 
         if (InputIsKeyPressed(SDLK_p)){

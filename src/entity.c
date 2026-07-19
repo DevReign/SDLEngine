@@ -48,10 +48,11 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 
 
 void EntityKill(int id){
+	//if (id < activeCount && activeCount > 0) {
 	for (int i = 0; i < activeCount; i++){
 		if (entities[i].id == id) {
-			entities[i] = entities[activeCount - 1];
 			activeCount--;
+			entities[i] = entities[activeCount];
 		}
 	}
 }
@@ -71,8 +72,9 @@ unsigned int EntityGetActiveCount() {
 Entity* EntityCheckCollisionByRadius(Vec2 v, int r) {
 	for (int i = 0; i < activeCount; i++) {
 		unsigned char ent_r = entities[i].data->radius;
-		float dx = entities[i].pos.x - v.x;
-		float dy = entities[i].pos.y - v.y;
+		//TODO: use width and height later, but radius for now
+		float dx = (entities[i].pos.x + ent_r) - (v.x + r);
+		float dy = (entities[i].pos.y + ent_r) - (v.y + r);
 		float dist = dx + dy;
 		unsigned short radius = ent_r + r;
 		if ((dist * dist) < (radius* radius))
@@ -86,6 +88,7 @@ Entity* EntityGetById(int id) {
 		if (entities[i].id == id)
 			return &entities[i];
 	}
+	return NULL;
 }
 
 void EntityDraw(Entity  *e){
@@ -122,7 +125,8 @@ void EntityAnimate(Entity *e){
 
 void EntityUpdateAll(){
 	for (unsigned char i = 0; i < activeCount; ++i){
-		if (!entities[i].active) break;
+		if (!entities[i].active) continue;
+
 		Entity* e = &entities[i];
 		switch (e->data->type){
 		case TYPE_CREATURE:
@@ -133,6 +137,7 @@ void EntityUpdateAll(){
 				if (e->pos.x > g_player->pos.x+16) e->pos.x -= 1;
 				if (e->pos.y < g_player->pos.y-16) e->pos.y += 1;
 				if (e->pos.y > g_player->pos.y+16) e->pos.y -= 1;
+				if (e->health < 1) EntityKill(e->id);
 				break;
 			}
 			break;
@@ -142,25 +147,14 @@ void EntityUpdateAll(){
 	}
 }
 
-void EntityDrawAll()
-{
+void EntityDrawAll() {
 	Entity *e = 0;
 	SDL_Point center = { 8, 8 };
 	for (unsigned char i = 0; i < activeCount; ++i) {
-		if (!entities[i].active) break;
+		if (!entities[i].active) continue;
 		e = &entities[i];
 		ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 	}
-}
-Entity* EntityGetAtPoint(int px, int py) {
-	Entity *e = 0;
-	for (unsigned short i = 0; i < 32; ++i) {
-		if (entities[i].id != 0){
-			//if at the point
-			return e;
-		}
-	}
-	return e;
 }
 
 void EntityMoveWithCollision(Entity* e, Vec2 vel) {

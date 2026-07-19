@@ -11,7 +11,7 @@
 typedef struct{
 	bool active, invulnerable, playingAnim;
 	unsigned char state;
-	unsigned short id, health, frame, direction;
+	short id, health, frame, direction;
 	struct EntityBlueprint *data;
 	Vec2 pos, vel, lastDir;
 	int right, bottom;

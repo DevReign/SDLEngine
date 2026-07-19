@@ -20,7 +20,7 @@ void LevelSave(const char* filename);
 void LevelLoad(const char* filename);
 void LevelSelectRoom(int id);
 void LevelDraw();
-short LevelInit();
+void LevelInit();
 short LevelFindAdjectId(short dir);
 bool LevelIsTileSolid(int x, int y);
 short LevelGetTileId(int x, int y);

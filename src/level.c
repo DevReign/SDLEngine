@@ -59,6 +59,7 @@ short LevelFindAdjectId(short dir) {
     case 2: return (chunkId + LEVEL_WIDTH > LEVEL_SIZE-1) ? LEVEL_SIZE-1 : chunkId + LEVEL_WIDTH;
     case 3: return (chunkId - 1 > 0) ? chunkId - 1 : 0;
     }
+    return 0;
 }
 
 void LevelDraw() {
@@ -88,7 +89,7 @@ short LevelGetTileId(int x, int y) {
     return tileData[local_id + offset];
 }
 
-short LevelInit() {
+void LevelInit() {
     SDL_memset(tileData, 0, ARRAY_SIZE);
     SDL_memset(objectData, 0, ARRAY_SIZE);
     SDL_memset(solidTiles, 0, NUM_TILES);

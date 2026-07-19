@@ -27,7 +27,7 @@ Projectile* ProjectileGetPool(void);
 int ProjectileGetActiveCount(void);
 void ProjectileInit();
 Projectile * ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f);
-void ProjectileDestroy(int index);
+void ProjectileDestroy(unsigned short i);
 void ProjectileUpdateAll(void);
 void ProjectileDrawAll(void);
 #endif

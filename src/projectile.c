@@ -3,10 +3,10 @@
 #include "level.h"
 
 static Projectile projectiles[MAX_PROJECTILES];
-static activeCount = 0;
+static unsigned char activeCount = 0;
 
 static Projectile projectileDatabase[PROJ_COUNT] = {
-	{.faction = FACTION_ENEMY, .radius = 8, .spriteId = 0, .vfxId = 0, .sfxId = 0 }
+	{.faction = FACTION_ENEMY, .damage = 10, .radius = 8, .spriteId = 0, .vfxId = 0, .sfxId = 0 }
 };
 
 Projectile* ProjectileGetPool(void) {
@@ -22,9 +22,11 @@ void ProjectileInit() {
 }
 
 Projectile * ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f) {
+	Projectile* p = NULL;
 	if (activeCount < MAX_PROJECTILES) {
+		//printf("activeCount %d \n", activeCount);
 		//projectiles[activeCount] = projectileDatabase[type];
-		Projectile* p = &projectiles[activeCount];
+		p = &projectiles[activeCount];
 		*p = projectileDatabase[type];
 		p->active = true;
 		p->faction = f;
@@ -33,22 +35,25 @@ Projectile * ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f) {
 		p->vel = vel;
 		activeCount++;
 	}
+	return p;
 }
 
-void ProjectileDestroy(int i) {
-	if (i >= 0 && i < activeCount)
+void ProjectileDestroy(unsigned short i) {
+	if (i < activeCount && activeCount > 0) {
 		activeCount--;
 		projectiles[i] = projectiles[activeCount];
 		projectiles[activeCount].active = false;
+		printf("activeCount %d \n", activeCount);
+	}
 }
 
 void ProjectileUpdateAll(void) {
 	for (int i = 0; i < activeCount; i++) {
+		//if (!projectiles[i].active) break;
+		projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);
 		if (projectiles[i].pos.x > 256 || projectiles[i].pos.x < -16 || projectiles[i].pos.y > 240 || projectiles[i].pos.y < 0) {
 			ProjectileDestroy(i);
-			return nullptr;
 		}
-		projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);
 	}
 }
 
