@@ -15,6 +15,7 @@ typedef enum {
 // Sound effect indices
 typedef enum {
     SND_HIT = 0,
+    SND_SHOOT,
     SND_COUNT
 } SoundID;
 

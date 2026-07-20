@@ -43,16 +43,17 @@ void ProjectileDestroy(unsigned short i) {
 		activeCount--;
 		projectiles[i] = projectiles[activeCount];
 		projectiles[activeCount].active = false;
-		printf("activeCount %d \n", activeCount);
+		printf("Projectile activeCount= %d \n", activeCount);
 	}
 }
 
 void ProjectileUpdateAll(void) {
 	for (int i = 0; i < activeCount; i++) {
-		//if (!projectiles[i].active) break;
+		if (!projectiles[i].active) break;
 		projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);
 		if (projectiles[i].pos.x > 256 || projectiles[i].pos.x < -16 || projectiles[i].pos.y > 240 || projectiles[i].pos.y < 0) {
-			ProjectileDestroy(i);
+			ProjectileDestroy(i); 
+			break;
 		}
 	}
 }
@@ -60,6 +61,7 @@ void ProjectileUpdateAll(void) {
 void ProjectileDrawAll(void) {
 	for (int i = 0; i < activeCount; i++) {
 		Projectile* p = &projectiles[i];
+		if (!p->active) break;
 		ImageDrawTile(p->pos.x, p->pos.y, TEX_ATLAS, p->spriteId);
 	}
 }

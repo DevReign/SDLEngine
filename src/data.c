@@ -8,6 +8,7 @@ void DatabaseLoadAssets(void) {
     // Music & Sounds
     AudioLoadMusic("audio/Retroloop.ogg");
     AudioLoadSound("audio/bfxrHit.ogg", SND_HIT);
+    AudioLoadSound("audio/bfxrShoot.ogg", SND_SHOOT);
 
     // Configure
     AudioSetVolume(10);

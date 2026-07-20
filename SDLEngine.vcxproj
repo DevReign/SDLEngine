@@ -23,6 +23,7 @@
     <ClCompile Include="src\audio.c" />
     <ClCompile Include="src\data.c" />
     <ClCompile Include="src\clock.c" />
+    <ClCompile Include="src\vfx.c" />
     <ClCompile Include="src\engine.c" />
     <ClCompile Include="src\entity.c" />
     <ClCompile Include="src\game.c" />
@@ -41,6 +42,7 @@
     <ClInclude Include="src\data.h" />
     <ClInclude Include="src\clock.h" />
     <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\vfx.h" />
     <ClInclude Include="src\engine.h" />
     <ClInclude Include="src\entity.h" />
     <ClInclude Include="src\game.h" />
