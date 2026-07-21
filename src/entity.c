@@ -1,5 +1,6 @@
 #include "entity.h"
 #include "level.h"
+#include "vfx.h"
 
 static Entity entities[MAX_ENTITIES] = { 0 };//static Entity *entityPool[64] = { 0 };
 static unsigned short entityCount = 0;
@@ -137,7 +138,10 @@ void EntityUpdateAll(){
 				if (e->pos.x > g_player->pos.x+16) e->pos.x -= 1;
 				if (e->pos.y < g_player->pos.y-16) e->pos.y += 1;
 				if (e->pos.y > g_player->pos.y+16) e->pos.y -= 1;
-				if (e->health < 1) EntityKill(e->id);
+				if (e->health < 1){ 
+					EntityKill(e->id);
+					VfxSpawn(e->pos, 516, 4);
+				}
 				break;
 			}
 			break;

@@ -58,8 +58,7 @@ void GameUpdate(void) {
             if (!p->active) break;
             for (int t = 0; t < CHUNK_SIZE; t++) {
                 if (LevelIsTileSolid(p->pos.x+p->radius, p->pos.y+ p->radius)) {
-                    
-                    VfxSpawn(p->pos, 256, 4);
+                    VfxSpawn(p->pos, 512, 3);
                     AudioPlaySound(SND_HIT);
                     ProjectileDestroy(i);
                     break;
@@ -70,7 +69,7 @@ void GameUpdate(void) {
                 if (ent != nullptr) {
                     if (p->faction != ent->data->faction){
                         ent->health -= p->damage;
-                        VfxSpawn(p->pos, 256, 4);
+                        VfxSpawn(p->pos, 512, 3);
                         AudioPlaySound(SND_HIT);
                         ProjectileDestroy(i);
                         break;
@@ -79,7 +78,7 @@ void GameUpdate(void) {
             }
         }
         
-        PlayerUpdate();
+        PlayerUpdate(dt);
 
         if (InputIsKeyPressed(SDLK_p)){
             printf("Debug: %f, %f \n", g_player->pos.x, g_player->pos.y);
@@ -97,18 +96,22 @@ void GameUpdate(void) {
         //TODO: refactor and add actual player dimensions later. move to levelupdate?
         if (g_player->pos.x < 1){
             LevelSelectRoom(LevelFindAdjectId(3));
+            ProjectileDestroyAll();
             g_player->pos.x = CHUNK_WIDTH * 16 - 18;
         }
         else if (g_player->pos.x+16 > CHUNK_WIDTH*16-2){
             LevelSelectRoom(LevelFindAdjectId(1));
+            ProjectileDestroyAll();
             g_player->pos.x = 2;
         }
         else if (g_player->pos.y+16 > CHUNK_HEIGHT * 16-2){
             LevelSelectRoom(LevelFindAdjectId(2));
+            ProjectileDestroyAll();
             g_player->pos.y = 2;
         }
         else if (g_player->pos.y < 1){
             LevelSelectRoom(LevelFindAdjectId(0));
+            ProjectileDestroyAll();
             g_player->pos.y = CHUNK_HEIGHT * 16 - 18;
         }
     }

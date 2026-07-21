@@ -4,6 +4,7 @@
 #include "projectile.h"
 
 PlayerProgress g_playerProgress = { 0 };
+static float attackCoolDown = 0.0f;
 
 void PlayerInit(int gridX, int gridY) {
     g_playerProgress.keys = 0;
@@ -13,7 +14,7 @@ void PlayerInit(int gridX, int gridY) {
     g_player = EntitySpawn(gridX * TILE_SIZE, gridY * TILE_SIZE, ENT_PLAYER);
 }
 
-void PlayerUpdate(void) {
+void PlayerUpdate(float dt) {
     if (g_player == NULL || g_player->id == 0) return;
     Vec2 dir;
     dir.x = 0;
@@ -48,8 +49,14 @@ void PlayerUpdate(void) {
 
     EntityMoveWithCollision(g_player,dir);
 
-    if (InputIsKeyPressed(SDLK_SPACE)) {
+    if (attackCoolDown > 0){
+        attackCoolDown -= dt;
+    }
+
+    if (InputIsKeyHeld(SDLK_SPACE) && attackCoolDown <= 0) {
         ProjectileSpawn(g_player->pos, g_player->lastDir, PROJ_BULLET, FACTION_PLAYER);
+        AudioPlaySound(SND_SHOOT);
+        attackCoolDown = 0.32f;
     }
 
 }

@@ -19,7 +19,7 @@ extern PlayerProgress g_playerProgress;
 
 // Execution Control Loops called by game.c
 void PlayerInit(int gridX, int gridY);
-void PlayerUpdate(void);
+void PlayerUpdate(float dt);
 //void PlayerRender(void);
 
 #endif

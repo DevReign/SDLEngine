@@ -6,7 +6,7 @@ static Projectile projectiles[MAX_PROJECTILES];
 static unsigned char activeCount = 0;
 
 static Projectile projectileDatabase[PROJ_COUNT] = {
-	{.faction = FACTION_ENEMY, .damage = 10, .radius = 8, .spriteId = 0, .vfxId = 0, .sfxId = 0 }
+	{.faction = FACTION_ENEMY, .damage = 10, .radius = 8, .spriteId = 512, .vfxId = 0, .sfxId = 0 }
 };
 
 Projectile* ProjectileGetPool(void) {
@@ -45,6 +45,11 @@ void ProjectileDestroy(unsigned short i) {
 		projectiles[activeCount].active = false;
 		printf("Projectile activeCount= %d \n", activeCount);
 	}
+}
+
+void ProjectileDestroyAll(void) {
+	SDL_memset(projectiles, 0, activeCount);
+	activeCount = 0;
 }
 
 void ProjectileUpdateAll(void) {
