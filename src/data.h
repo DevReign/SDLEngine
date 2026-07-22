@@ -6,6 +6,8 @@
 #include "vector.h"
 
 // Texture slot mappings for the Image module, prob remove for 1 2048 texture atlas
+enum Direction{ UP=0, DOWN, LEFT, RIGHT};
+
 typedef enum {
     TEX_ATLAS = 0,
     TEX_GUI,

@@ -43,7 +43,6 @@ void ProjectileDestroy(unsigned short i) {
 		activeCount--;
 		projectiles[i] = projectiles[activeCount];
 		projectiles[activeCount].active = false;
-		printf("Projectile activeCount= %d \n", activeCount);
 	}
 }
 
@@ -52,7 +51,7 @@ void ProjectileDestroyAll(void) {
 	activeCount = 0;
 }
 
-void ProjectileUpdateAll(void) {
+void ProjectileUpdateAll(float dt) {
 	for (int i = 0; i < activeCount; i++) {
 		if (!projectiles[i].active) break;
 		projectiles[i].pos = Vec2Add(projectiles[i].pos, projectiles[i].vel);

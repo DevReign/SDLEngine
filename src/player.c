@@ -24,21 +24,25 @@ void PlayerUpdate(float dt) {
     if (InputIsKeyHeld(SDLK_a)){
         dir.x = -1;
         g_player->direction = 90;
+        g_player->facingDir = LEFT;
         //EntityAnimate(g_player);
     }
     else if (InputIsKeyHeld(SDLK_d)){
         dir.x = 1;
         g_player->direction = 270;
+        g_player->facingDir = RIGHT;
         //EntityAnimate(g_player);
     }
     else if (InputIsKeyHeld(SDLK_w)){
         dir.y = -1;
         g_player->direction = 180;
+        g_player->facingDir = UP;
         //EntityAnimate(g_player);
     }
     else if (InputIsKeyHeld(SDLK_s)){
         dir.y = 1;
         g_player->direction = 0;
+        g_player->facingDir = DOWN;
         //EntityAnimate(g_player);
     }
 
@@ -54,9 +58,10 @@ void PlayerUpdate(float dt) {
     }
 
     if (InputIsKeyHeld(SDLK_SPACE) && attackCoolDown <= 0) {
-        ProjectileSpawn(g_player->pos, g_player->lastDir, PROJ_BULLET, FACTION_PLAYER);
+        ProjectileSpawn(g_player->pos, Vec2Scale(g_player->lastDir, 2), PROJ_BULLET, FACTION_PLAYER);
         AudioPlaySound(SND_SHOOT);
         attackCoolDown = 0.32f;
+        //printf("player facing dir %d \n", g_player->facingDir);
     }
 
 }

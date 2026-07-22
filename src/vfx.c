@@ -24,10 +24,10 @@ Vfx * VfxSpawn(Vec2 pos, int f, int num_frames) {
 		v->pos.x = pos.x;
 		v->pos.y = pos.y;
 		v->frame = f;
-		v->numFrames = num_frames;
+		v->rate = 0.16f;
 		v->lastFrame = f + num_frames;
-		v->loop = false;
-		v->radius = 8;
+		//v->loop = false;
+		//v->radius = 8;
 		//p->vel = vel;
 		activeCount++;
 	}
@@ -49,12 +49,11 @@ void VfxUpdateAll(float dt) {
 			break;
 
 		vfxPool[i].frameTimer += dt;
-		if (vfxPool[i].frameTimer > 0.15f)
+		if (vfxPool[i].frameTimer > vfxPool[i].rate)
 		{
-			vfxPool[i].frameTimer -= 0.15f;
+			vfxPool[i].frameTimer -= vfxPool[i].rate;
 			vfxPool[i].frame++;
 			if (vfxPool[i].frame > vfxPool[i].lastFrame){
-				printf("vfx activeCount= %d \n", activeCount);
 				VfxDestroy(i);
 				break;
 			}

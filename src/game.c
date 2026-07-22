@@ -45,9 +45,9 @@ void GameUpdate(void) {
 
     case STATE_GAMEPLAY: {
         // Update Game Objects (AI, Animations, Life Cycles)
-        EntityUpdateAll();
+        EntityUpdateAll(dt);
         //update projectiles
-        ProjectileUpdateAll();
+        ProjectileUpdateAll(dt);
         
         VfxUpdateAll(dt);
 
@@ -71,6 +71,9 @@ void GameUpdate(void) {
                         ent->health -= p->damage;
                         VfxSpawn(p->pos, 512, 3);
                         AudioPlaySound(SND_HIT);
+                        ent->hurtFrames = 12;
+                        ent->knockbackDir = g_player->facingDir;
+                        printf("ent id= %d \n", ent->id);
                         ProjectileDestroy(i);
                         break;
                     }
@@ -81,7 +84,7 @@ void GameUpdate(void) {
         PlayerUpdate(dt);
 
         if (InputIsKeyPressed(SDLK_p)){
-            printf("Debug: %f, %f \n", g_player->pos.x, g_player->pos.y);
+            printf("Debug: %f \n", ClockGetFps());
         }
 
         if (InputIsMousePressed(1)) {

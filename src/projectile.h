@@ -29,6 +29,6 @@ void ProjectileInit();
 Projectile * ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f);
 void ProjectileDestroy(unsigned short i);
 void ProjectileDestroyAll(void);
-void ProjectileUpdateAll(void);
+void ProjectileUpdateAll(float dt);
 void ProjectileDrawAll(void);
 #endif

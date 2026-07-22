@@ -28,7 +28,7 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 
 	if (activeCount < MAX_ENTITIES) {
 		Entity* ent = &entities[activeCount];
-		printf("debug %d \n", activeCount);
+		printf("Spawn entityCount= %d \n", entityCount);
 		// Wipe instance data block
 		SDL_memset(ent, 0, sizeof(Entity));
 
@@ -76,9 +76,9 @@ Entity* EntityCheckCollisionByRadius(Vec2 v, int r) {
 		//TODO: use width and height later, but radius for now
 		float dx = (entities[i].pos.x + ent_r) - (v.x + r);
 		float dy = (entities[i].pos.y + ent_r) - (v.y + r);
-		float dist = dx + dy;
+		float dist = dx*dx + dy*dy;
 		unsigned short radius = ent_r + r;
-		if ((dist * dist) < (radius* radius))
+		if ((dist) < (radius* radius))
 			return &entities[i];
 	}
 	return nullptr;
@@ -93,6 +93,11 @@ Entity* EntityGetById(int id) {
 }
 
 void EntityDraw(Entity  *e){
+	if (e->hurtFrames > 0) {
+		e->hurtFrames -= 0.016;// move to update?
+		if ((int)e->hurtFrames *10 % 2==0)
+			return;
+	}
 	SDL_Point center = { 8, 8 };
 	ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 }
@@ -124,7 +129,7 @@ void EntityAnimate(Entity *e){
 	}
 }
 
-void EntityUpdateAll(){
+void EntityUpdateAll(float dt){
 	for (unsigned char i = 0; i < activeCount; ++i){
 		if (!entities[i].active) continue;
 
@@ -134,14 +139,26 @@ void EntityUpdateAll(){
 			EntityAnimate(e);
 			switch (e->data->ai) {
 			case AI_CHASE_PLAYER:
+				if (e->health < 1) {
+					EntityKill(e->id);
+					VfxSpawn(e->pos, 516, 4);
+				}
+				if (e->hurtFrames > 0) {
+					e->hurtFrames--;
+					
+					switch (e->knockbackDir) {
+					case UP:    e->pos.y -= 2; break;// speed * deltaTime; break;
+					case DOWN:  e->pos.y += 2; break;
+					case LEFT:  e->pos.x -= 2; break;
+					case RIGHT: e->pos.x += 2; break;
+					}
+					break;
+				}
 				if (e->pos.x < g_player->pos.x-16) e->pos.x += 1;
 				if (e->pos.x > g_player->pos.x+16) e->pos.x -= 1;
 				if (e->pos.y < g_player->pos.y-16) e->pos.y += 1;
 				if (e->pos.y > g_player->pos.y+16) e->pos.y -= 1;
-				if (e->health < 1){ 
-					EntityKill(e->id);
-					VfxSpawn(e->pos, 516, 4);
-				}
+				
 				break;
 			}
 			break;
@@ -156,7 +173,11 @@ void EntityDrawAll() {
 	SDL_Point center = { 8, 8 };
 	for (unsigned char i = 0; i < activeCount; ++i) {
 		if (!entities[i].active) continue;
+
 		e = &entities[i];
+		if (e->hurtFrames > 0) {
+			if (e->hurtFrames % 3 == 0) continue;
+		}
 		ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
 	}
 }

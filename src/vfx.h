@@ -11,11 +11,11 @@
 #define MAX_VFX 64
 
 typedef struct {
-	bool active, loop;
-	unsigned char radius;//width, height,
+	bool active;// , loop;
+	//unsigned char radius;//just used for centering 
 	Vec2 pos;//vel
-	int frame, numFrames, lastFrame; //sourceX, sourceY; //for specific texture atlast coordinates
-	float frameTimer;
+	int frame, lastFrame; //sourceX, sourceY; //for specific texture atlast coordinates
+	float frameTimer, rate;
 }Vfx;
 
 Vfx* VfxGetPool(void);

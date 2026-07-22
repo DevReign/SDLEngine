@@ -14,8 +14,8 @@ static unsigned short frameCount = 0;
 void ClockInit()
 {}
 
-double ClockGetTime(){
-	return 0;
+double ClockGetFps(){
+    return fps;
 }
 
 float ClockGetDeltaTime(){

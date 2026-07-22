@@ -10,12 +10,12 @@
 
 typedef struct{
 	bool active, invulnerable, playingAnim;
-	unsigned char state;
+	unsigned char state, facingDir, knockbackDir, hurtFrames;
 	short id, health, frame, direction;
 	struct EntityBlueprint *data;
 	Vec2 pos, vel, lastDir;
 	int right, bottom;
-	float attackTimer, animTimer, flinchTimer;
+	float attackTimer, animTimer;// knockbackTimer, hurtTimer, flinchTimer;
 } Entity;
 
 extern Entity* g_player;
@@ -32,7 +32,7 @@ void EntityAnimate(Entity* e);
 Entity * EntitySpawn(int x, int y, unsigned int eid);
 void EntityKill(int id);
 void EntityClearAll();
-void EntityUpdateAll();
+void EntityUpdateAll(float dt);
 void EntityDrawAll();
 //void EntityQuit() {};
 void EntityMoveWithCollision(Entity* e, Vec2 vel);
