@@ -15,7 +15,9 @@ void PlayerInit(int gridX, int gridY) {
 }
 
 void PlayerUpdate(float dt) {
-    if (g_player == NULL || g_player->id == 0) return;
+    if (g_player == NULL) return;
+    if (g_player->health<1) return;
+
     Vec2 dir;
     dir.x = 0;
     dir.y = 0;

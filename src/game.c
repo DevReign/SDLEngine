@@ -74,7 +74,7 @@ void GameUpdate(void) {
                         AudioPlaySound(SND_HIT);
                         ent->hurtFrames = 12;
                         ent->knockbackDir = g_player->facingDir;
-                        printf("ent id= %d \n", ent->id);
+                        //printf("ent id= %d \n", ent->id);
                         ProjectileDestroy(i);
                         break;
                     }

@@ -41,6 +41,7 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 		ent->id = ++entityCount;
 		ent->animTimer = 0.14f;
 		ent->active = true;
+		ent->playingAnim = true;
 		activeCount++;
 		return ent;
 	}
@@ -113,6 +114,8 @@ void EntitySetPos(Entity *e, int px, int py){
 }
 
 void EntityAnimate(Entity *e){
+	if (!e->playingAnim)
+		return;
 	e->animTimer -= (float)ClockGetDeltaTime();
 	int lastFrame = (e->data->frameStart + e->data->numFrames) - 1;
 
@@ -143,29 +146,37 @@ void EntityUpdateAll(float dt){
 					EntityKill(e->id);
 					VfxSpawn(e->pos, 516, 4);
 				}
-				//knockback when hurt
-				if (e->hurtFrames > 0) {
-					e->hurtFrames--;
-					
-					switch (e->knockbackDir) {
-					case UP:    e->pos.y -= 2; break;// speed * deltaTime; break;
-					case DOWN:  e->pos.y += 2; break;
-					case LEFT:  e->pos.x -= 2; break;
-					case RIGHT: e->pos.x += 2; break;
-					}
-					break;
-				}
+				
 				//move toward player
-				if (e->pos.x < g_player->pos.x-16) e->pos.x += 1;
-				if (e->pos.x > g_player->pos.x+16) e->pos.x -= 1;
-				if (e->pos.y < g_player->pos.y-16) e->pos.y += 1;
-				if (e->pos.y > g_player->pos.y+16) e->pos.y -= 1;
+				if (e->pos.x < g_player->pos.x-16) {
+					e->pos.x += 1;
+					e->facingDir = RIGHT;
+				}
+				if (e->pos.x > g_player->pos.x+16) {
+					e->pos.x -= 1;
+					e->facingDir = LEFT;
+				}
+				if (e->pos.y < g_player->pos.y-16) {
+					e->pos.y += 1;
+					e->facingDir = DOWN;
+				}
+				if (e->pos.y > g_player->pos.y+16) {
+					e->pos.y -= 1;
+					e->facingDir = UP;
+				}
+				//attack player
 				if (e->attackTimer <= 0){
 					if (Vec2CheckRadiusOverlap(e->pos,9,g_player->pos, 9)){
 						e->attackTimer = 0.80f;// e->data->attackSpeed;
 						AudioPlaySound(SND_HIT);
 						g_player->health -= 10;
+						g_player->knockbackDir = e->facingDir;
+						g_player->hurtFrames = 12;
 						VfxSpawn(g_player->pos, 0, 1);
+						if (g_player->health < 1) {
+							g_player->frame = 286;
+							g_player->playingAnim = false;
+						}
 					}
 				}
 				else {
@@ -173,9 +184,20 @@ void EntityUpdateAll(float dt){
 				}
 				break;
 			}
+			//knockback when hurt
+			if (e->hurtFrames > 0) {
+				e->hurtFrames--;
+
+				switch (e->knockbackDir) {
+				case UP:    e->pos.y -= 2; break;// speed * deltaTime; break;
+				case DOWN:  e->pos.y += 2; break;
+				case LEFT:  e->pos.x -= 2; break;
+				case RIGHT: e->pos.x += 2; break;
+				}
+				break;
+			}
 			break;
-		case TYPE_PROJECTILE:
-			break;
+		//case TYPE_DECO: break;
 		}		
 	}
 }
