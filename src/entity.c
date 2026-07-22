@@ -143,6 +143,7 @@ void EntityUpdateAll(float dt){
 					EntityKill(e->id);
 					VfxSpawn(e->pos, 516, 4);
 				}
+				//knockback when hurt
 				if (e->hurtFrames > 0) {
 					e->hurtFrames--;
 					
@@ -154,11 +155,22 @@ void EntityUpdateAll(float dt){
 					}
 					break;
 				}
+				//move toward player
 				if (e->pos.x < g_player->pos.x-16) e->pos.x += 1;
 				if (e->pos.x > g_player->pos.x+16) e->pos.x -= 1;
 				if (e->pos.y < g_player->pos.y-16) e->pos.y += 1;
 				if (e->pos.y > g_player->pos.y+16) e->pos.y -= 1;
-				
+				if (e->attackTimer <= 0){
+					if (Vec2CheckRadiusOverlap(e->pos,9,g_player->pos, 9)){
+						e->attackTimer = 0.80f;// e->data->attackSpeed;
+						AudioPlaySound(SND_HIT);
+						g_player->health -= 10;
+						VfxSpawn(g_player->pos, 0, 1);
+					}
+				}
+				else {
+					e->attackTimer -= dt;
+				}
 				break;
 			}
 			break;

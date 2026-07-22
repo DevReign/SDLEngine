@@ -39,3 +39,13 @@ Vec2 Vec2Normalize(Vec2 v) {
 float Vec2Distance(Vec2 a, Vec2 b) {
     return Vec2Length(Vec2Sub(a, b));
 }
+
+bool Vec2CheckRadiusOverlap(Vec2 posA, int rA, Vec2 posB, int rB) {
+    float dx = posA.x - posB.x;
+    float dy = posA.y - posB.y;
+    float distSq = (dx * dx) + (dy * dy);
+
+    int totalRadius = rA + rB;
+    return (distSq < (totalRadius * totalRadius));
+}
+

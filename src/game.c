@@ -6,6 +6,7 @@
 #include "player.h"
 #include "projectile.h"
 #include "vfx.h"
+#include "hud.h"
 
 static GameState currentState = STATE_TITLE;
 
@@ -142,10 +143,8 @@ void GameDraw(void) {
         ProjectileDrawAll();
         VfxDrawAll();
         //LevelDrawForeground();  // Layer 3 - Overhead door frames, tree tops
-        //HUDDraw();              // Layer 4 - UI
+        HudDraw(0,152);              // Layer 4 - UI
 
-        //Font test
-        ImageDrawText(0, 152, TEX_GUI, "Testing ImageDrawText()!");
         break;
 
     case STATE_GAMEOVER:

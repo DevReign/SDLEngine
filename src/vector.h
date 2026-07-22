@@ -21,5 +21,6 @@ Vec2  Vec2Scale(Vec2 v, float scalar);
 float Vec2Length(Vec2 v);
 Vec2  Vec2Normalize(Vec2 v);
 float Vec2Distance(Vec2 a, Vec2 b);
+bool Vec2CheckRadiusOverlap(Vec2 posA, int rA, Vec2 posB, int rB);
 
 #endif
