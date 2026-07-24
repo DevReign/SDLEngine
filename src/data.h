@@ -33,9 +33,10 @@ typedef enum {
 typedef enum {
     TYPE_STATIC = 0, // No logic
     TYPE_CREATURE,   // Actively moves, takes damage, tracks health
-    TYPE_PROJECTILE, 
-    TYPE_EFFECT,     // Visual-only
-    TYPE_COUNT
+    TYPE_DECOR,
+    TYPE_SYSTEM,
+    TYPE_PICKUP,
+    TYPE_COUNT// TYPE_PROJECTILE, TYPE_EFFECT,
 } EntityType;
 
 // AI indices

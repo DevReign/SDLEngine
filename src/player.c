@@ -50,7 +50,7 @@ void PlayerUpdate(float dt) {
 
     //save last direction for attacks
     //TODO: maintain aim direction for attacks while button is held
-    if(dir.x != 0 || dir.y != 0)// && !InputIsKeyHeld(SDLK_SPACE))
+    if(!InputIsKeyHeld(SDLK_SPACE) && (dir.x != 0 || dir.y != 0))
         g_player->lastDir = dir;
 
     EntityMoveWithCollision(g_player,dir);
@@ -60,7 +60,7 @@ void PlayerUpdate(float dt) {
     }
 
     if (InputIsKeyHeld(SDLK_SPACE) && attackCoolDown <= 0) {
-        ProjectileSpawn(g_player->pos, Vec2Scale(g_player->lastDir, 2), PROJ_BULLET, FACTION_PLAYER);
+        ProjectileSpawn( Vec2Add(g_player->pos, Vec2Scale(g_player->lastDir, 16)), Vec2Scale(g_player->lastDir, 2), PROJ_BULLET, FACTION_PLAYER);
         AudioPlaySound(SND_SHOOT);
         attackCoolDown = 0.32f;
         //printf("player facing dir %d \n", g_player->facingDir);

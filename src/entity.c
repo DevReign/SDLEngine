@@ -1,6 +1,7 @@
 #include "entity.h"
 #include "level.h"
 #include "vfx.h"
+#include "ai.h"
 
 static Entity entities[MAX_ENTITIES] = { 0 };//static Entity *entityPool[64] = { 0 };
 static unsigned short entityCount = 0;
@@ -141,48 +142,8 @@ void EntityUpdateAll(float dt){
 		case TYPE_CREATURE:
 			EntityAnimate(e);
 			switch (e->data->ai) {
-			case AI_CHASE_PLAYER:
-				if (e->health < 1) {
-					EntityKill(e->id);
-					VfxSpawn(e->pos, 516, 4);
-				}
+			case AI_CHASE_PLAYER: AIChaseMelee(e, dt);
 				
-				//move toward player
-				if (e->pos.x < g_player->pos.x-16) {
-					e->pos.x += 1;
-					e->facingDir = RIGHT;
-				}
-				if (e->pos.x > g_player->pos.x+16) {
-					e->pos.x -= 1;
-					e->facingDir = LEFT;
-				}
-				if (e->pos.y < g_player->pos.y-16) {
-					e->pos.y += 1;
-					e->facingDir = DOWN;
-				}
-				if (e->pos.y > g_player->pos.y+16) {
-					e->pos.y -= 1;
-					e->facingDir = UP;
-				}
-				//attack player
-				if (e->attackTimer <= 0){
-					if (Vec2CheckRadiusOverlap(e->pos,9,g_player->pos, 9)){
-						e->attackTimer = 0.80f;// e->data->attackSpeed;
-						AudioPlaySound(SND_HIT);
-						g_player->health -= 10;
-						g_player->knockbackDir = e->facingDir;
-						g_player->hurtFrames = 12;
-						VfxSpawn(g_player->pos, 0, 1);
-						if (g_player->health < 1) {
-							g_player->frame = 286;
-							g_player->playingAnim = false;
-						}
-					}
-				}
-				else {
-					e->attackTimer -= dt;
-				}
-				break;
 			}
 			//knockback when hurt
 			if (e->hurtFrames > 0) {
@@ -223,7 +184,7 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 	//X-axis
 	for (int i = 0; i < abs(vel.x); i++) {
 		int step_x = sign(vel.x);
-		int next_x = step_x + e->pos.x;
+		int next_x = step_x + (int)e->pos.x;
 		int check_x = (step_x > 0) ? next_x + width : next_x;
 		bool ct = LevelIsTileSolid(check_x, e->pos.y);
 		bool cb = LevelIsTileSolid(check_x, e->bottom);
@@ -250,7 +211,7 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 	// Y-axis
 	for (int i = 0; i < abs(vel.y); i++) {
 		int step_y = sign(vel.y);
-		int next_y = step_y + e->pos.y;
+		int next_y = step_y + (int)e->pos.y;
 		int check_y = (step_y > 0) ? next_y + height : next_y;
 		bool cl = LevelIsTileSolid(e->pos.x, check_y);
 		bool cr = LevelIsTileSolid(e->right, check_y);

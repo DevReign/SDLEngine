@@ -72,6 +72,9 @@
     <ClCompile Include="src\vfx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ai.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\config.h">
@@ -123,6 +126,9 @@
       <Filter>Header Files\weappers</Filter>
     </ClInclude>
     <ClInclude Include="src\vfx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ai.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

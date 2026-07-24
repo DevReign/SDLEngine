@@ -1,4 +1,5 @@
 #include "data.h"
+#include "ai.h" //just need for enums
 
 void DatabaseLoadAssets(void) {
     // Load Graphic Atlas Sheets
