@@ -4,9 +4,10 @@
 //#include "entity.h"
 
 void AIChaseMelee(Entity* e, float dt) {
-	if (e->health < 1) {
+	if (e->health < 1 && e->knockbackDir) {
 		EntityKill(e->id);
 		VfxSpawn(e->pos, 516, 4);
+		EntitySpawn(e->pos.x, e->pos.y, ENT_SOUL);
 	}
 
 	//move toward player

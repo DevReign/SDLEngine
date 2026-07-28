@@ -38,6 +38,24 @@ struct EntityBlueprint entityDatabase[ENT_COUNT] = {
         .width = 15, .height = 15, .radius = 8, .rotateSprite = false,
         .projectileId = 0, .frameStart = 484, .frameAttack = 16, .numFrames = 4, .animRate = 0.16f
     },
+    // ENT_SOUL 
+    {
+        .type = TYPE_PICKUP, .ai = AI_NONE,
+        .width = 15, .height = 15, .radius = 8, .rotateSprite = false,
+        .frameStart = 285, .numFrames = 1, .animRate = 0.0f
+    },
+    // ENT_STAIRS_DOWN
+    {
+        .type = TYPE_SYSTEM,
+        .width = 15, .height = 15, .radius = 8, .rotateSprite = false,
+        .frameStart = 201, .numFrames = 1, .animRate = 0.0f
+    },
+    // ENT_STAIRS_UP
+    {
+        .type = TYPE_SYSTEM,
+        .width = 15, .height = 15, .radius = 8, .rotateSprite = false,
+        .frameStart = 200, .numFrames = 1, .animRate = 0.0f
+    }
 };
 
 /*

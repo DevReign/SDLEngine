@@ -15,6 +15,8 @@ void EntityManagerInit() {
 	for (int i = 0; i < MAX_ENTITIES; ++i) {
 		Entity * ent = &entities[i];
 		ent->data = &entityDatabase[ENT_DUMMY];
+		ent->eType = TYPE_STATIC;
+		ent->eId = ENT_DUMMY;
 		ent->pos.x = 0;
 		ent->pos.y = 0;
 		ent->health = ent->data->maxHealth;
@@ -35,11 +37,13 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 
 		// Binds spawn properties
 		ent->data = spawnData;
+		ent->eType = spawnData->type;
 		ent->pos.x = x;
 		ent->pos.y = y;
 		ent->health = spawnData->maxHealth;
 		ent->frame = spawnData->frameStart;
 		ent->id = ++entityCount;
+		ent->eId;
 		ent->animTimer = 0.14f;
 		ent->active = true;
 		ent->playingAnim = true;
@@ -49,13 +53,24 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 	return nullptr;
 }
 
-
 void EntityKill(int id){
 	//if (id < activeCount && activeCount > 0) {
 	for (int i = 0; i < activeCount; i++){
 		if (entities[i].id == id) {
+			//activeCount--;
+			//entities[i] = entities[activeCount];
+			entities[i].active = false;
+			break;
+		}
+	}
+}
+
+void EntityCleanup(void) {
+	for (int i = activeCount - 1; i > 0; i--) {
+		if (!entities[i].active) {
+			// Swap with the last active entity
+			entities[i] = entities[activeCount - 1];
 			activeCount--;
-			entities[i] = entities[activeCount];
 		}
 	}
 }
@@ -66,6 +81,10 @@ void EntityClearAll() {
 		entities[i].active = false;
 	}
 	activeCount = 1;
+}
+
+Entity* EntityGetPool(void) {
+	return &entities;
 }
 
 unsigned int EntityGetActiveCount() {
@@ -145,7 +164,7 @@ void EntityUpdateAll(float dt){
 			case AI_CHASE_PLAYER: AIChaseMelee(e, dt);
 				
 			}
-			//knockback when hurt
+			//knockback creatures when hurt
 			if (e->hurtFrames > 0) {
 				e->hurtFrames--;
 
@@ -158,7 +177,7 @@ void EntityUpdateAll(float dt){
 				break;
 			}
 			break;
-		//case TYPE_DECO: break;
+		case TYPE_PICKUP: break;
 		}		
 	}
 }
@@ -196,12 +215,12 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 			//Nudge player around tiles
 			if (!ct && cb) {
 				e->pos.y -= 1;
-				e->bottom = e->pos.y + height;
+				e->bottom = (int)e->pos.y + height;
 				break;
 			}
 			else if (ct && !cb) {
 				e->pos.y += 1;
-				e->bottom = e->pos.y + height;
+				e->bottom = (int)e->pos.y + height;
 				break;
 			}
 			break;
@@ -224,15 +243,50 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 			//Nudge player around tiles
 			if (!cl && cr) {
 				e->pos.x -= 1;
-				e->right = e->pos.x + width;
+				e->right = (int)e->pos.x + width;
 				break;
 			}
 			else if (cl && !cr) {
 				e->pos.x += 1;
-				e->right = e->pos.x + width;
+				e->right = (int)e->pos.x + width;
 				break;
 			}
 			break;
 		}
 	}
+}
+void EntityCheckCollisions(void) {
+	unsigned short active_count_entity = EntityGetActiveCount();
+	Entity* entity_pool = EntityGetPool();
+	Entity* player = g_player;
+	//Check collision for entities 
+	for (int i = 0; i < active_count_entity; i++) {
+		Entity* a = &entity_pool[i];
+		for (int j = i + 1; j < active_count_entity; j++) {
+			Entity* b = &entity_pool[j];
+
+			//check for collision
+			if (Vec2CheckRadiusOverlap(a->pos, 8, b->pos, 8)) {
+				if (a == g_player && b->eType == TYPE_PICKUP) {
+					if(a->health < a->data->maxHealth)
+						a->health += 15;
+					b->active = false;//EntityKill(b->id);
+					continue;
+				}
+				else if (a == g_player && b->eType == TYPE_SYSTEM) {
+					if (b->eId == ENT_STAIRS_DOWN) {
+
+					}
+					else if (b->eId == ENT_STAIRS_UP) {
+
+					}
+					continue;
+				}
+			}
+		}
+	}
+
+	//put inactive at the end of the pool
+	//needed until I fix swap-and-pop
+	EntityCleanup();
 }

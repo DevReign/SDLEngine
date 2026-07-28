@@ -17,7 +17,7 @@ void GameInit(void) {
     DatabaseLoadAssets();
     
     EntityManagerInit();
-    //init player first to be at index[0], so we can clear everything when changing rooms
+    //init player first to be at index[0], so we can clear everything when changing rooms. could also have isPlayer bool
     PlayerInit(10, 5);
     // Load initial map data
     LevelInit();
@@ -47,10 +47,42 @@ void GameUpdate(void) {
     case STATE_GAMEPLAY: {
         // Update Game Objects (AI, Animations, Life Cycles)
         EntityUpdateAll(dt);
-        //update projectiles
         ProjectileUpdateAll(dt);
-        
         VfxUpdateAll(dt);
+
+        unsigned short active_count_entity = EntityGetActiveCount();
+        Entity* entity_pool = EntityGetPool();
+        Entity* player = g_player;
+        //Check collision for entities 
+        for (int i = 0; i < active_count_entity; i++){
+            Entity* a = &entity_pool[i];
+            for (int j = i+1; j < active_count_entity; j++) {
+                Entity* b = &entity_pool[j];
+                
+                //check for collision
+                if (Vec2CheckRadiusOverlap(a->pos, 8, b->pos, 8)) {
+                    if (a == g_player && b->eType == TYPE_PICKUP){
+                        if (a->health < a->data->maxHealth)
+                            a->health += 15;
+                        b->active = false;//EntityKill(b->id);
+                        continue;
+                    }
+                    else if (a == g_player && b->eType == TYPE_SYSTEM) {
+                        if (b->eId == ENT_STAIRS_DOWN) {
+
+                        }
+                        else if (b->eId == ENT_STAIRS_UP) {
+
+                        }
+                        continue;
+                    }
+                }
+            }
+        }
+
+        //put inactive at the end of the pool
+        //needed until I fix swap-and-pop
+        EntityCleanup();
 
         //Check collision for projectiles
         Projectile* proj_pool = ProjectileGetPool();
@@ -69,14 +101,17 @@ void GameUpdate(void) {
                 Entity* ent = EntityCheckCollisionByRadius(p->pos, p->radius);
                 if (ent != nullptr) {
                     if (p->faction != ent->data->faction){
-                        ent->health -= p->damage;
-                        VfxSpawn(p->pos, 512, 3);
-                        AudioPlaySound(SND_HIT);
-                        ent->hurtFrames = 12;
-                        ent->knockbackDir = g_player->facingDir;
-                        //printf("ent id= %d \n", ent->id);
-                        ProjectileDestroy(i);
-                        break;
+                        if (ent->eType == TYPE_CREATURE) {
+                            ent->health -= p->damage;
+                            VfxSpawn(p->pos, 512, 3);
+                            AudioPlaySound(SND_HIT);
+                            ent->hurtFrames = 12;
+                            //TODO: lock direction to proj dir not the player
+                            ent->knockbackDir = p->direction;
+                            //printf("ent id= %d \n", ent->id);
+                            ProjectileDestroy(i);
+                            break;
+                        }
                     }
                 }
             }

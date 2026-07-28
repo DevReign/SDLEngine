@@ -6,7 +6,7 @@
 #include "vector.h"
 
 // Texture slot mappings for the Image module, prob remove for 1 2048 texture atlas
-enum Direction{ UP=0, DOWN, LEFT, RIGHT};
+enum Direction{ UP=0, LEFT, DOWN, RIGHT};
 
 typedef enum {
     TEX_ATLAS = 0,
@@ -26,6 +26,9 @@ typedef enum {
     ENT_DUMMY = 0,
     ENT_PLAYER,
     ENT_ZOMBIE,
+    ENT_SOUL,
+    ENT_STAIRS_DOWN,
+    ENT_STAIRS_UP,
     ENT_COUNT
 } EntityID;
 
@@ -33,10 +36,9 @@ typedef enum {
 typedef enum {
     TYPE_STATIC = 0, // No logic
     TYPE_CREATURE,   // Actively moves, takes damage, tracks health
-    TYPE_DECOR,
     TYPE_SYSTEM,
     TYPE_PICKUP,
-    TYPE_COUNT// TYPE_PROJECTILE, TYPE_EFFECT,
+    TYPE_COUNT// TYPE_PROJECTILE, TYPE_EFFECT,TYPE_DECOR,
 } EntityType;
 
 // AI indices

@@ -17,7 +17,7 @@ typedef enum {
 
 typedef struct {
 	bool active;
-	unsigned char radius, damage, vfxId, sfxId;//width, height,
+	unsigned char radius, damage, vfxId, sfxId, direction;//width, height,
 	Faction faction;
 	Vec2 pos, vel;
 	int spriteId; //sourceX, sourceY; //for specific texture atlast coordinates

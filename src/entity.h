@@ -11,6 +11,8 @@
 typedef struct{
 	bool active, invulnerable, playingAnim;
 	unsigned char state, facingDir, knockbackDir, hurtFrames;
+	EntityType eType;
+	EntityID eId;
 	short id, health, frame, direction;
 	struct EntityBlueprint *data;
 	Vec2 pos, vel, lastDir;
@@ -20,6 +22,7 @@ typedef struct{
 
 extern Entity* g_player;
 
+Entity* EntityGetPool(void);
 void EntityManagerInit();
 Entity * EntityGetById(int id);
 Entity * EntityCheckCollisionByRadius(Vec2 v, int r);
@@ -31,10 +34,11 @@ void EntityAnimate(Entity* e);
 //bool EntityCollide();
 Entity * EntitySpawn(int x, int y, unsigned int eid);
 void EntityKill(int id);
-void EntityClearAll();
+void EntityCleanup(void); // puts inactive at the end of the pool 
+void EntityClearAll(); //clear pool, except for the player
 void EntityUpdateAll(float dt);
 void EntityDrawAll();
 //void EntityQuit() {};
 void EntityMoveWithCollision(Entity* e, Vec2 vel);
-
+void EntityCheckCollisions(void);
 #endif
