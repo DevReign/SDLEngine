@@ -116,7 +116,7 @@ Entity* EntityGetById(int id) {
 void EntityDraw(Entity  *e){
 	if (e->hurtFrames > 0) {
 		e->hurtFrames -= 0.016;// move to update?
-		if ((int)e->hurtFrames *10 % 2==0)
+		if ((int)e->hurtFrames *10 % 4==0)
 			return;
 	}
 	SDL_Point center = { 8, 8 };
@@ -169,20 +169,17 @@ void EntityUpdateAll(float dt){
 				e->hurtFrames--;
 				
 				switch (e->knockbackDir) {
-				case UP:    e->vel.y -= 2; break;// speed * deltaTime; break;
-				case DOWN:  e->vel.y += 2; break;
-				case LEFT:  e->vel.x -= 2; break;
-				case RIGHT: e->vel.x += 2; break;
+				case UP:    e->vel.y = -2; break;// speed * deltaTime; break;
+				case DOWN:  e->vel.y = 2; break;
+				case LEFT:  e->vel.x = -2; break;
+				case RIGHT: e->vel.x = 2; break;
 				}
-				
-				break;
 			}
-			
-				//move
-				EntityMoveWithCollision(e, e->vel);
-				//apply friction
-				e->vel.x = 0;
-				e->vel.y = 0;
+			//move
+			EntityMoveWithCollision(e, e->vel);
+			//apply friction
+			e->vel.x = 0;
+			e->vel.y = 0;
 			break;
 		case TYPE_PICKUP: break;
 		}		

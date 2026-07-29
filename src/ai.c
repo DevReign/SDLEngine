@@ -4,10 +4,13 @@
 //#include "entity.h"
 
 void AIChaseMelee(Entity* e, float dt) {
+	if (e->hurtFrames > 0) return;
+
 	if (e->health < 1 && e->knockbackDir) {
 		EntityKill(e->id);
 		VfxSpawn(e->pos, 516, 4);
 		EntitySpawn(e->pos.x, e->pos.y, ENT_SOUL);
+		AudioPlaySound(SND_DEATH);
 	}
 
 	if (!Vec2CheckRadiusOverlap(e->pos, 12,g_player->pos, 12)){
@@ -35,7 +38,6 @@ void AIChaseMelee(Entity* e, float dt) {
 	if (e->attackTimer <= 0) {
 		if (Vec2CheckRadiusOverlap(e->pos, 12, g_player->pos, 12)) {
 			e->attackTimer = 0.80f;// e->data->attackSpeed;
-			AudioPlaySound(SND_HIT);
 			g_player->health -= 10;
 			g_player->knockbackDir = e->facingDir;
 			g_player->hurtFrames = 12;
@@ -43,6 +45,10 @@ void AIChaseMelee(Entity* e, float dt) {
 			if (g_player->health < 1) {
 				g_player->frame = 286;
 				g_player->playingAnim = false;
+				AudioPlaySound(SND_DEATH);
+			}
+			else {
+				AudioPlaySound(SND_HURT);
 			}
 		}
 	}

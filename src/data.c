@@ -7,13 +7,17 @@ void DatabaseLoadAssets(void) {
     ImageLoadTilesheet("images/gui.bmp", TEX_GUI, 8, 8);
 
     // Music & Sounds
-    AudioLoadMusic("audio/Retroloop.ogg");
-    AudioLoadSound("audio/bfxrHit.ogg", SND_HIT);
+    AudioLoadMusic("audio/euo.mp3");
+    AudioLoadSound("audio/Hit.wav", SND_HIT);
     AudioLoadSound("audio/bfxrShoot.ogg", SND_SHOOT);
+    AudioLoadSound("audio/mdeath.wav", SND_DEATH);
+    AudioLoadSound("audio/mpain.wav", SND_HURT);
+    AudioLoadSound("audio/step.wav", SND_STEP);
+    AudioLoadSound("audio/pickup.wav",SND_PICKUP);
 
     // Configure
     AudioSetVolume(10);
-    //AudioPlayMusic();
+    AudioPlayMusic();
 }
 
 struct EntityBlueprint entityDatabase[ENT_COUNT] = {
@@ -55,6 +59,12 @@ struct EntityBlueprint entityDatabase[ENT_COUNT] = {
         .type = TYPE_SYSTEM,
         .width = 15, .height = 15, .radius = 8, .rotateSprite = false,
         .frameStart = 200, .numFrames = 1, .animRate = 0.0f
+    },
+    // ENT_UPGRADE
+    {
+        .type = TYPE_PICKUP, .ai = AI_NONE,
+        .width = 15, .height = 15, .radius = 8, .rotateSprite = false,
+        .frameStart = 260, .numFrames = 1, .animRate = 0.0f
     }
 };
 

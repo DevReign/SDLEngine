@@ -91,11 +91,11 @@ short LevelGetTileId(int x, int y) {
     return tileData[local_id + offset];
 }
 
-void LevelInit() {
+void LevelInit(const char* level) {
     SDL_memset(tileData, 0, ARRAY_SIZE);
     SDL_memset(objectData, 0, ARRAY_SIZE);
     SDL_memset(solidTiles, 0, NUM_TILES);
-    LevelLoad("0.bin");
+    LevelLoad(level);
     LevelSelectRoom(0);
 
     //load tile properties - from file later 

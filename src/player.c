@@ -5,6 +5,7 @@
 
 PlayerProgress g_playerProgress = { 0 };
 static float attackCoolDown = 0.0f;
+static int mana = 0;
 
 void PlayerInit(int gridX, int gridY) {
     g_playerProgress.keys = 0;
@@ -16,43 +17,42 @@ void PlayerInit(int gridX, int gridY) {
 
 void PlayerUpdate(float dt) {
     if (g_player == NULL) return;
-    if (g_player->health<1) return;
+    if (g_player->health<1 || g_player->hurtFrames > 0) return;
 
-    Vec2 dir;
-    dir.x = 0;
-    dir.y = 0;
+    //Vec2 dir = { 0 };
 
     //TODO: make it so most recent direction overrides last using a queue
     if (InputIsKeyHeld(SDLK_a)){
-        dir.x = -1;
+        g_player->vel.x = -1;
         g_player->direction = 90;
         g_player->facingDir = LEFT;
         //EntityAnimate(g_player);
     }
     else if (InputIsKeyHeld(SDLK_d)){
-        dir.x = 1;
+        g_player->vel.x = 1;
         g_player->direction = 270;
         g_player->facingDir = RIGHT;
         //EntityAnimate(g_player);
     }
     else if (InputIsKeyHeld(SDLK_w)){
-        dir.y = -1;
+        g_player->vel.y = -1;
         g_player->direction = 180;
         g_player->facingDir = UP;
         //EntityAnimate(g_player);
     }
     else if (InputIsKeyHeld(SDLK_s)){
-        dir.y = 1;
+        g_player->vel.y = 1;
         g_player->direction = 0;
         g_player->facingDir = DOWN;
         //EntityAnimate(g_player);
     }
 
     //save last direction for attacks
-    if((dir.x != 0 || dir.y != 0))// && !InputIsKeyHeld(SDLK_SPACE))
-        g_player->lastDir = dir;
+    if((g_player->vel.x != 0 || g_player->vel.y != 0))// && !InputIsKeyHeld(SDLK_SPACE))
+        g_player->lastDir = g_player->vel;
 
-    EntityMoveWithCollision(g_player,dir);
+    //Moved to Entity update for all creatures
+    //EntityMoveWithCollision(g_player, g_player->vel);
 
     if (attackCoolDown > 0){
         attackCoolDown -= dt;
@@ -63,7 +63,5 @@ void PlayerUpdate(float dt) {
         p->direction = g_player->facingDir;
         AudioPlaySound(SND_SHOOT);
         attackCoolDown = 0.32f;
-        //printf("player facing dir %d \n", g_player->facingDir);
     }
-
 }

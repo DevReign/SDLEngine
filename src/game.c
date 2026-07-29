@@ -12,16 +12,11 @@ static GameState currentState = STATE_TITLE;
 static float levelChangeTimer = 0.0f;
 
 void GameInit(void) {
-    // Initialize the master blueprint array
-    
-    //DatabaseInit();
     DatabaseLoadAssets();
-    
     EntityManagerInit();
     //init player first to be at index[0], so we can clear everything when changing rooms. could also have isPlayer bool
     PlayerInit(10, 5);
-    // Load initial map data
-    LevelInit();
+    LevelInit("levels/0.bin");
     ProjectileInit();
     VfxInit();
 
@@ -74,6 +69,7 @@ void GameUpdate(void) {
                 //check for collision
                 if (Vec2CheckRadiusOverlap(a->pos, 8, b->pos, 8)) {
                     if (a == g_player && b->eType == TYPE_PICKUP){
+                        AudioPlaySound(SND_PICKUP);
                         if (a->health < a->data->maxHealth)
                             a->health += 15;
                         b->active = false;//EntityKill(b->id);
@@ -83,15 +79,16 @@ void GameUpdate(void) {
                         if (levelChangeTimer > 0)
                             continue;
                         if (b->eId == ENT_STAIRS_DOWN) {
-                            //printf("touching system object \n");
+                            AudioPlaySound(SND_STEP);
                             EntityClearAll();
-                            LevelLoad("1.bin");
+                            LevelLoad("levels/1.bin");
                             LevelSelectRoom(LevelGetRoomId());
                             levelChangeTimer = 1.4f;
                         }
                         else if (b->eId == ENT_STAIRS_UP) {
+                            AudioPlaySound(SND_STEP);
                             EntityClearAll();
-                            LevelLoad("0.bin");
+                            LevelLoad("levels/0.bin");
                             LevelSelectRoom(LevelGetRoomId());
                             levelChangeTimer = 1.4f;
                         }
@@ -124,8 +121,8 @@ void GameUpdate(void) {
                         if (ent->eType == TYPE_CREATURE) {
                             ent->health -= p->damage;
                             VfxSpawn(p->pos, 512, 3);
-                            AudioPlaySound(SND_HIT);
-                            ent->hurtFrames = 12;
+                            AudioPlaySound(SND_HURT);
+                            ent->hurtFrames = 16;
                             //TODO: lock direction to proj dir not the player
                             ent->knockbackDir = p->direction;
                             //printf("ent id= %d \n", ent->id);
@@ -156,6 +153,7 @@ void GameUpdate(void) {
             // It's scale/2, wire up vars later
             printf("solid= %d \n", LevelGetTileId((mx + 3 / 2) / 3, (my + 3 / 2) / 3));
         }
+
         //change rooms
         //TODO: refactor and add actual player dimensions later. move to levelupdate?
         if (g_player->pos.x < 1){
@@ -199,7 +197,7 @@ void GameDraw(void) {
 
     case STATE_GAMEPLAY:
 
-        LevelDraw(); //LevelDrawBackground();  // Layer 1 - Floors, Paths, Water
+        LevelDraw();   // Layer 1 - Floors, Paths, Water
         EntityDrawAll();          // Layer 2 - Player, Enemies, Items (Y-Sorted?)
         ProjectileDrawAll();
         VfxDrawAll();

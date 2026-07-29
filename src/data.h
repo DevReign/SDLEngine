@@ -18,6 +18,10 @@ typedef enum {
 typedef enum {
     SND_HIT = 0,
     SND_SHOOT,
+    SND_DEATH,
+    SND_HURT,
+    SND_STEP,
+    SND_PICKUP,
     SND_COUNT
 } SoundID;
 
@@ -29,6 +33,7 @@ typedef enum {
     ENT_SOUL,
     ENT_STAIRS_DOWN,
     ENT_STAIRS_UP,
+    ENT_UPGRADE,
     ENT_COUNT
 } EntityID;
 
