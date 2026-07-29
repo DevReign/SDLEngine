@@ -149,6 +149,10 @@ class Level:
                 obj_id = self.chunkObjects[index]
                 if obj_id > 0:
                     DrawTile(surface, atlas, objs[obj_id], (pixel_x, pixel_y))
+    def Clear(self):
+        for i in range(self.chunkSize):
+            self.chunkTiles[i]=5
+            self.chunkObjects[i]=0
 
 class Selector:
     def __init__(self, selector_rect, atlas, tile_size=16, scale=2):
@@ -160,10 +164,13 @@ class Selector:
         self.scrollY = 0
         # create data for now, load it in later
         self.objectCatalog={
-            0: 0,  #dummy data/nothing
+            0: 0,   #dummy data/nothing
             1: 288, #Player
             2: 508, #enemy
-            3: 257, #chest
+            3: 286, #soul
+            4: 201, #stairs down
+            5: 200, #stairs up
+            6: 258  #upgrade chest
         }
     def Scroll(self, offset):
         self.scrollY += offset
@@ -345,6 +352,8 @@ class LevelEditor:
                         for c in range(self.level.chunkWidth):
                             if(self.level.GetId(c, r)==tid):
                                 self.level.SetId(c, r, self.selectedTile)
+                elif event.key == pygame.K_z:
+                    self.level.Clear()
                         
                     
     def Update(self):

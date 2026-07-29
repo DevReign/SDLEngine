@@ -50,7 +50,9 @@ void LevelSelectRoom(int id) {
         }
     }
 }
-
+int LevelGetRoomId(void) {
+    return chunkId;
+}
 short LevelFindAdjectId(short dir) {
     //up, right, down, left
     switch (dir) {

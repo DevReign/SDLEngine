@@ -43,7 +43,7 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 		ent->health = spawnData->maxHealth;
 		ent->frame = spawnData->frameStart;
 		ent->id = ++entityCount;
-		ent->eId;
+		ent->eId = eid;
 		ent->animTimer = 0.14f;
 		ent->active = true;
 		ent->playingAnim = true;
@@ -157,25 +157,32 @@ void EntityUpdateAll(float dt){
 		if (!entities[i].active) continue;
 
 		Entity* e = &entities[i];
-		switch (e->data->type){
+		switch (e->data->type) {
 		case TYPE_CREATURE:
 			EntityAnimate(e);
 			switch (e->data->ai) {
 			case AI_CHASE_PLAYER: AIChaseMelee(e, dt);
-				
+
 			}
 			//knockback creatures when hurt
 			if (e->hurtFrames > 0) {
 				e->hurtFrames--;
-
+				
 				switch (e->knockbackDir) {
-				case UP:    e->pos.y -= 2; break;// speed * deltaTime; break;
-				case DOWN:  e->pos.y += 2; break;
-				case LEFT:  e->pos.x -= 2; break;
-				case RIGHT: e->pos.x += 2; break;
+				case UP:    e->vel.y -= 2; break;// speed * deltaTime; break;
+				case DOWN:  e->vel.y += 2; break;
+				case LEFT:  e->vel.x -= 2; break;
+				case RIGHT: e->vel.x += 2; break;
 				}
+				
 				break;
 			}
+			
+				//move
+				EntityMoveWithCollision(e, e->vel);
+				//apply friction
+				e->vel.x = 0;
+				e->vel.y = 0;
 			break;
 		case TYPE_PICKUP: break;
 		}		

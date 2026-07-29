@@ -15,6 +15,7 @@ typedef enum {
 
 // Interface called by main.c
 void GameInit(void);
+void GameRestart(void);
 void GameUpdate(void);
 void GameDraw(void);
 void GameQuit(void);

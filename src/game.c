@@ -9,10 +9,11 @@
 #include "hud.h"
 
 static GameState currentState = STATE_TITLE;
+static float levelChangeTimer = 0.0f;
 
 void GameInit(void) {
     // Initialize the master blueprint array
-    EngineInit("Game", 960, 540);//(320, 180, "Game"); (640, 360, "Game");
+    
     //DatabaseInit();
     DatabaseLoadAssets();
     
@@ -26,6 +27,14 @@ void GameInit(void) {
 
     // Set state
     currentState = STATE_GAMEPLAY;
+}
+
+void GameRestart(void) {
+    LevelSelectRoom(0);
+    currentState = STATE_GAMEPLAY;
+    g_player->health = g_player->data->maxHealth;
+    g_player->frame = g_player->data->frameStart;
+    g_player->playingAnim = true;
 }
 
 void GameUpdate(void) {
@@ -45,6 +54,9 @@ void GameUpdate(void) {
         break;
 
     case STATE_GAMEPLAY: {
+        if (levelChangeTimer > 0)
+            levelChangeTimer -= dt;
+
         // Update Game Objects (AI, Animations, Life Cycles)
         EntityUpdateAll(dt);
         ProjectileUpdateAll(dt);
@@ -68,13 +80,21 @@ void GameUpdate(void) {
                         continue;
                     }
                     else if (a == g_player && b->eType == TYPE_SYSTEM) {
+                        if (levelChangeTimer > 0)
+                            continue;
                         if (b->eId == ENT_STAIRS_DOWN) {
-
+                            //printf("touching system object \n");
+                            EntityClearAll();
+                            LevelLoad("1.bin");
+                            LevelSelectRoom(LevelGetRoomId());
+                            levelChangeTimer = 1.4f;
                         }
                         else if (b->eId == ENT_STAIRS_UP) {
-
+                            EntityClearAll();
+                            LevelLoad("0.bin");
+                            LevelSelectRoom(LevelGetRoomId());
+                            levelChangeTimer = 1.4f;
                         }
-                        continue;
                     }
                 }
             }
@@ -119,6 +139,11 @@ void GameUpdate(void) {
         
         PlayerUpdate(dt);
 
+        //Game Over
+        if (g_player->health < 1)
+            currentState = STATE_GAMEOVER;
+
+        //debug
         if (InputIsKeyPressed(SDLK_p)){
             printf("Debug: %f \n", ClockGetFps());
         }
@@ -156,8 +181,9 @@ void GameUpdate(void) {
     }
         
     case STATE_GAMEOVER:
-        if (InputIsKeyPressed(SDL_SCANCODE_R)) {
-            GameInit(); // reset
+        ImageDrawText(48, 120, TEX_GUI, "Game Over");
+        if (InputIsKeyPressed(SDLK_r)) {
+            GameRestart(); // reset
         }
         break;
     }

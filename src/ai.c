@@ -10,26 +10,30 @@ void AIChaseMelee(Entity* e, float dt) {
 		EntitySpawn(e->pos.x, e->pos.y, ENT_SOUL);
 	}
 
-	//move toward player
-	if (e->pos.x < g_player->pos.x - 16) {
-		e->pos.x += 1;
-		e->facingDir = RIGHT;
+	if (!Vec2CheckRadiusOverlap(e->pos, 12,g_player->pos, 12)){
+		//move toward player
+		if (e->pos.x < g_player->pos.x - 16) {
+			e->vel.x += 1;
+			e->facingDir = RIGHT;
+		}
+		else if (e->pos.x > g_player->pos.x + 16) {
+			e->vel.x -= 1;
+			e->facingDir = LEFT;
+		}
+		if (e->pos.y < g_player->pos.y - 16) {
+			e->vel.y += 1;
+			e->facingDir = DOWN;
+		}
+		else if (e->pos.y > g_player->pos.y + 16) {
+			e->vel.y -= 1;
+			e->facingDir = UP;
+		}
+		//EntityMoveWithCollision(e, e->vel);
 	}
-	if (e->pos.x > g_player->pos.x + 16) {
-		e->pos.x -= 1;
-		e->facingDir = LEFT;
-	}
-	if (e->pos.y < g_player->pos.y - 16) {
-		e->pos.y += 1;
-		e->facingDir = DOWN;
-	}
-	if (e->pos.y > g_player->pos.y + 16) {
-		e->pos.y -= 1;
-		e->facingDir = UP;
-	}
+
 	//attack player
 	if (e->attackTimer <= 0) {
-		if (Vec2CheckRadiusOverlap(e->pos, 9, g_player->pos, 9)) {
+		if (Vec2CheckRadiusOverlap(e->pos, 12, g_player->pos, 12)) {
 			e->attackTimer = 0.80f;// e->data->attackSpeed;
 			AudioPlaySound(SND_HIT);
 			g_player->health -= 10;

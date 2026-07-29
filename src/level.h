@@ -19,6 +19,7 @@
 void LevelSave(const char* filename);
 void LevelLoad(const char* filename);
 void LevelSelectRoom(int id);
+int LevelGetRoomId(void);
 void LevelDraw();
 void LevelInit();
 short LevelFindAdjectId(short dir);
