@@ -6,10 +6,12 @@
 void AIChaseMelee(Entity* e, float dt) {
 	if (e->hurtFrames > 0) return;
 
-	if (e->health < 1 && e->knockbackDir) {
-		EntityKill(e->id);
+	if (e->health < 1 && e->hurtFrames < 1) {
+		//EntityKill(e->id);
+		e->active = false;
 		VfxSpawn(e->pos, 516, 4);
 		EntitySpawn(e->pos.x, e->pos.y, ENT_SOUL);
+		printf("Melee enemy died \n");
 		AudioPlaySound(SND_DEATH);
 	}
 

@@ -4,34 +4,34 @@
 #include "ai.h"
 
 static Entity entities[MAX_ENTITIES] = { 0 };//static Entity *entityPool[64] = { 0 };
-static unsigned short entityCount = 0;
+static unsigned short entityCount = 0; //tracks unique ids
 static unsigned short activeCount = 0;
 Entity* g_player = NULL;
 extern struct EntityBlueprint entityDatabase[ENT_COUNT];
+static float levelChangeTimer = 0.0f;
 
 void EntityManagerInit() {
 	entityCount = 0;
 	g_player = NULL;
-	for (int i = 0; i < MAX_ENTITIES; ++i) {
-		Entity * ent = &entities[i];
-		ent->data = &entityDatabase[ENT_DUMMY];
-		ent->eType = TYPE_STATIC;
-		ent->eId = ENT_DUMMY;
-		ent->pos.x = 0;
-		ent->pos.y = 0;
-		ent->health = ent->data->maxHealth;
-		ent->frame = ent->data->frameStart;
-		ent->id = 0;
-		ent->animTimer = 0.14f;
-	}
+	SDL_memset(entities, 0, activeCount);
+	//spawn player here?
 }
 
 Entity* EntitySpawn(int x, int y, unsigned int eid) {
 	struct EntityBlueprint* spawnData = &entityDatabase[eid];
 
 	if (activeCount < MAX_ENTITIES) {
+		/*if (eid == ENT_PLAYER) {
+			// Force player to be at index 0
+			// so we don't destroy the player when changing rooms or maps
+			// also required for collision collision checks
+			Entity* ent = &entities[0];
+		}
+		else {
+			Entity* ent = &entities[activeCount];
+		}*/
 		Entity* ent = &entities[activeCount];
-		printf("Spawn entityCount= %d \n", entityCount);
+		//printf("Spawn activeCount= %d \n", activeCount);
 		// Wipe instance data block
 		SDL_memset(ent, 0, sizeof(Entity));
 
@@ -54,23 +54,30 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 }
 
 void EntityKill(int id){
-	//if (id < activeCount && activeCount > 0) {
-	for (int i = 0; i < activeCount; i++){
-		if (entities[i].id == id) {
-			//activeCount--;
-			//entities[i] = entities[activeCount];
-			entities[i].active = false;
-			break;
+	if (id < activeCount && activeCount > 0) {
+		for (int i = 0; i < activeCount; i++) {
+			if (entities[i].id == id) {
+				entities[i].active = false;
+				return;
+			}
 		}
 	}
+}
+
+void EntityKillIndex(int index) {
+	if (activeCount == 0) return;//index <= 0 || index >= activeCount ||
+	activeCount--;
+	entities[index] = entities[activeCount];
+	entities[activeCount].active = false;
 }
 
 void EntityCleanup(void) {
 	for (int i = activeCount - 1; i > 0; i--) {
 		if (!entities[i].active) {
 			// Swap with the last active entity
-			entities[i] = entities[activeCount - 1];
 			activeCount--;
+			entities[i] = entities[activeCount];
+			entities[activeCount].active = false;
 		}
 	}
 }
@@ -113,16 +120,6 @@ Entity* EntityGetById(int id) {
 	return NULL;
 }
 
-void EntityDraw(Entity  *e){
-	if (e->hurtFrames > 0) {
-		e->hurtFrames -= 0.016;// move to update?
-		if ((int)e->hurtFrames *10 % 4==0)
-			return;
-	}
-	SDL_Point center = { 8, 8 };
-	ImageDrawTileExt(e->pos.x, e->pos.y, TEX_ATLAS, e->frame, e->direction, &center, 0x00000000);
-}
-
 void EntityMove(Entity *e, Vec2 v){
 	e->pos.x += v.x;
 	e->pos.y += v.y;
@@ -153,11 +150,13 @@ void EntityAnimate(Entity *e){
 }
 
 void EntityUpdateAll(float dt){
-	for (unsigned char i = 0; i < activeCount; ++i){
-		if (!entities[i].active) continue;
+	if (levelChangeTimer > 0)
+		levelChangeTimer -= dt;
 
+	for (char i = activeCount-1; i >= 0; i--){
 		Entity* e = &entities[i];
-		switch (e->data->type) {
+		
+		switch (e->eType) {
 		case TYPE_CREATURE:
 			EntityAnimate(e);
 			switch (e->data->ai) {
@@ -182,16 +181,17 @@ void EntityUpdateAll(float dt){
 			e->vel.y = 0;
 			break;
 		case TYPE_PICKUP: break;
-		}		
+		}
+
+		//Get rid of it, if it's inactive
+		if (!e->active) EntityKillIndex(i);
 	}
 }
 
 void EntityDrawAll() {
 	Entity *e = 0;
 	SDL_Point center = { 8, 8 };
-	for (unsigned char i = 0; i < activeCount; ++i) {
-		if (!entities[i].active) continue;
-
+	for (char i = activeCount - 1; i >= 0; i--) {
 		e = &entities[i];
 		if (e->hurtFrames > 0) {
 			if (e->hurtFrames % 3 == 0) continue;
@@ -259,38 +259,56 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 		}
 	}
 }
-void EntityCheckCollisions(void) {
-	unsigned short active_count_entity = EntityGetActiveCount();
-	Entity* entity_pool = EntityGetPool();
+void EntityHandleAllCollisions(void){
 	Entity* player = g_player;
 	//Check collision for entities 
-	for (int i = 0; i < active_count_entity; i++) {
-		Entity* a = &entity_pool[i];
-		for (int j = i + 1; j < active_count_entity; j++) {
-			Entity* b = &entity_pool[j];
+	for (char i = activeCount - 1; i >= 0; i--) {
+		Entity* a = &entities[i];
+		for (int j = i - 1; j >= 0; j--) {
+			Entity* b = &entities[j];
 
 			//check for collision
 			if (Vec2CheckRadiusOverlap(a->pos, 8, b->pos, 8)) {
-				if (a == g_player && b->eType == TYPE_PICKUP) {
-					if(a->health < a->data->maxHealth)
-						a->health += 15;
-					b->active = false;//EntityKill(b->id);
+				if (a->eType == TYPE_PICKUP && b == g_player) {
+					AudioPlaySound(SND_PICKUP);
+					if (b->health < b->data->maxHealth)
+						b->health += 15;
+					EntityKillIndex(i);
 					continue;
 				}
-				else if (a == g_player && b->eType == TYPE_SYSTEM) {
-					if (b->eId == ENT_STAIRS_DOWN) {
-
+				else if (a->eType == TYPE_SYSTEM && b == g_player) {
+					if (levelChangeTimer > 0)
+						continue;
+					if (a->eId == ENT_STAIRS_DOWN) {
+						AudioPlaySound(SND_STEP);
+						EntityClearAll();
+						LevelLoad("levels/1.bin");
+						LevelSelectRoom(LevelGetRoomId());
+						levelChangeTimer = 1.4f;
 					}
-					else if (b->eId == ENT_STAIRS_UP) {
-
+					else if (a->eId == ENT_STAIRS_UP) {
+						AudioPlaySound(SND_STEP);
+						EntityClearAll();
+						LevelLoad("levels/0.bin");
+						LevelSelectRoom(LevelGetRoomId());
+						levelChangeTimer = 1.4f;
 					}
-					continue;
 				}
 			}
 		}
 	}
-
-	//put inactive at the end of the pool
-	//needed until I fix swap-and-pop
-	EntityCleanup();
 }
+
+/*
+* 
+* probably not needed to prevent destroying player?
+Entity* spawn_entity(EntityType type) {
+	// If trying to spawn a non-player, never let it touch index 0
+	if (type != TYPE_PLAYER && active_count == 0) {
+		active_count = 1; // Reserve index 0 explicitly for the player
+	}
+
+	// Player ALWAYS goes to index 0
+	int target_index = (type == TYPE_PLAYER) ? 0 : active_count++;
+	return &entities[target_index];
+}*/

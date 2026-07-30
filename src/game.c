@@ -9,7 +9,6 @@
 #include "hud.h"
 
 static GameState currentState = STATE_TITLE;
-static float levelChangeTimer = 0.0f;
 
 void GameInit(void) {
     DatabaseLoadAssets();
@@ -49,91 +48,13 @@ void GameUpdate(void) {
         break;
 
     case STATE_GAMEPLAY: {
-        if (levelChangeTimer > 0)
-            levelChangeTimer -= dt;
-
         // Update Game Objects (AI, Animations, Life Cycles)
         EntityUpdateAll(dt);
         ProjectileUpdateAll(dt);
         VfxUpdateAll(dt);
 
-        unsigned short active_count_entity = EntityGetActiveCount();
-        Entity* entity_pool = EntityGetPool();
-        Entity* player = g_player;
-        //Check collision for entities 
-        for (int i = 0; i < active_count_entity; i++){
-            Entity* a = &entity_pool[i];
-            for (int j = i+1; j < active_count_entity; j++) {
-                Entity* b = &entity_pool[j];
-                
-                //check for collision
-                if (Vec2CheckRadiusOverlap(a->pos, 8, b->pos, 8)) {
-                    if (a == g_player && b->eType == TYPE_PICKUP){
-                        AudioPlaySound(SND_PICKUP);
-                        if (a->health < a->data->maxHealth)
-                            a->health += 15;
-                        b->active = false;//EntityKill(b->id);
-                        continue;
-                    }
-                    else if (a == g_player && b->eType == TYPE_SYSTEM) {
-                        if (levelChangeTimer > 0)
-                            continue;
-                        if (b->eId == ENT_STAIRS_DOWN) {
-                            AudioPlaySound(SND_STEP);
-                            EntityClearAll();
-                            LevelLoad("levels/1.bin");
-                            LevelSelectRoom(LevelGetRoomId());
-                            levelChangeTimer = 1.4f;
-                        }
-                        else if (b->eId == ENT_STAIRS_UP) {
-                            AudioPlaySound(SND_STEP);
-                            EntityClearAll();
-                            LevelLoad("levels/0.bin");
-                            LevelSelectRoom(LevelGetRoomId());
-                            levelChangeTimer = 1.4f;
-                        }
-                    }
-                }
-            }
-        }
-
-        //put inactive at the end of the pool
-        //needed until I fix swap-and-pop
-        EntityCleanup();
-
-        //Check collision for projectiles
-        Projectile* proj_pool = ProjectileGetPool();
-        for (int i = 0; i < ProjectileGetActiveCount(); i++) {
-            Projectile* p = &proj_pool[i];
-            if (!p->active) break;
-            for (int t = 0; t < CHUNK_SIZE; t++) {
-                if (LevelIsTileSolid(p->pos.x+p->radius, p->pos.y+ p->radius)) {
-                    VfxSpawn(p->pos, 512, 3);
-                    AudioPlaySound(SND_HIT);
-                    ProjectileDestroy(i);
-                    break;
-                }
-            }
-            for (int e = 0; e < EntityGetActiveCount(); e++) {
-                Entity* ent = EntityCheckCollisionByRadius(p->pos, p->radius);
-                if (ent != nullptr) {
-                    if (p->faction != ent->data->faction){
-                        if (ent->eType == TYPE_CREATURE) {
-                            ent->health -= p->damage;
-                            VfxSpawn(p->pos, 512, 3);
-                            AudioPlaySound(SND_HURT);
-                            ent->hurtFrames = 16;
-                            //TODO: lock direction to proj dir not the player
-                            ent->knockbackDir = p->direction;
-                            //printf("ent id= %d \n", ent->id);
-                            ProjectileDestroy(i);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        
+        EntityHandleAllCollisions();
+        ProjectileHandleAllCollisions(EntityGetPool(),EntityGetActiveCount());
         PlayerUpdate(dt);
 
         //Game Over

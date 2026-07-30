@@ -10,6 +10,8 @@
 
 #define MAX_PROJECTILES 64
 
+struct Entity;
+
 typedef enum {
 	PROJ_BULLET = 0,
 	PROJ_COUNT
@@ -30,5 +32,6 @@ Projectile * ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f);
 void ProjectileDestroy(unsigned short i);
 void ProjectileDestroyAll(void);
 void ProjectileUpdateAll(float dt);
+void ProjectileHandleAllCollisions(struct Entity * e_pool, int e_count);
 void ProjectileDrawAll(void);
 #endif

@@ -6,6 +6,21 @@ static unsigned int objectData[ARRAY_SIZE];
 static bool solidTiles[NUM_TILES];
 static short chunkId = 0;
 
+void LevelInit(const char* level) {
+    SDL_memset(tileData, 0, ARRAY_SIZE);
+    SDL_memset(objectData, 0, ARRAY_SIZE);
+    SDL_memset(solidTiles, 0, NUM_TILES);
+    LevelLoad(level);
+    LevelSelectRoom(0);
+
+    //load tile properties - from file later 
+    solidTiles[1] = true;
+    solidTiles[2] = true;
+    solidTiles[79] = true;
+    solidTiles[148] = true;
+    solidTiles[149] = true;
+}
+
 void LevelSave(const char* filename) {
     FILE* file = fopen(filename, "wb");
     if (file != NULL) {
@@ -91,17 +106,3 @@ short LevelGetTileId(int x, int y) {
     return tileData[local_id + offset];
 }
 
-void LevelInit(const char* level) {
-    SDL_memset(tileData, 0, ARRAY_SIZE);
-    SDL_memset(objectData, 0, ARRAY_SIZE);
-    SDL_memset(solidTiles, 0, NUM_TILES);
-    LevelLoad(level);
-    LevelSelectRoom(0);
-
-    //load tile properties - from file later 
-    solidTiles[1] = true;
-    solidTiles[2] = true;
-    solidTiles[79] = true;
-    solidTiles[148] = true;
-    solidTiles[149] = true;
-}

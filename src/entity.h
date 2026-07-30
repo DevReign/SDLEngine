@@ -27,18 +27,18 @@ void EntityManagerInit();
 Entity * EntityGetById(int id);
 Entity * EntityCheckCollisionByRadius(Vec2 v, int r);
 unsigned int EntityGetActiveCount();
-void EntityDraw(Entity *e);
 void EntityMove(Entity *e, Vec2 v);
 void EntitySetPos(Entity *e, int px, int py);
 void EntityAnimate(Entity* e);
 //bool EntityCollide();
 Entity * EntitySpawn(int x, int y, unsigned int eid);
 void EntityKill(int id);
+void EntityKillIndex(int index);
 void EntityCleanup(void); // puts inactive at the end of the pool 
 void EntityClearAll(); //clear pool, except for the player
 void EntityUpdateAll(float dt);
 void EntityDrawAll();
 //void EntityQuit() {};
 void EntityMoveWithCollision(Entity* e, Vec2 vel);
-void EntityCheckCollisions(void);
+void EntityHandleAllCollisions(void);
 #endif
