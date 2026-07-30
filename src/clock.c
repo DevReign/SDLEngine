@@ -1,8 +1,8 @@
 #include "clock.h"
 
 // Time stuff
-static double msPerFrame = 1.0 / 60;
-static unsigned int intervalTime = 0;
+//static double msPerFrame = 1.0 / 60;
+//static unsigned int intervalTime = 0;
 static double timer = 0.0;
 static double prevTime = 0.0;
 static double curTime = 0.0;
@@ -43,6 +43,13 @@ void ClockTick(float target_fps) {
 
     prevTime = curTime;
     
-    // Optional: Calculate FPS for display
-    fps = (deltaTime > 0) ? 1.0f / deltaTime : target_fps;
+    //Optional- track FPS
+    frameCount++;
+    timer += deltaTime;
+
+    if (timer > 1.0f) {
+        fps = frameCount;
+        timer = 0;
+        frameCount = 0;
+    }
 }

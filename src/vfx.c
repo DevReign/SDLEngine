@@ -35,19 +35,14 @@ Vfx * VfxSpawn(Vec2 pos, int f, int num_frames) {
 }
 
 void VfxDestroy(unsigned short i) {
-	if (i < activeCount && activeCount > 0) {
 		activeCount--;
 		vfxPool[i] = vfxPool[activeCount];
 		vfxPool[activeCount].active = false;
-		//printf("activeCount %d \n", activeCount);
-	}
 }
 
 void VfxUpdateAll(float dt) {
-	for (int i = 0; i < activeCount; i++) {
-		if (!vfxPool[i].active)
-			break;
-
+	for (char i = activeCount - 1; i >= 0; i--) {
+		//Animate
 		vfxPool[i].frameTimer += dt;
 		if (vfxPool[i].frameTimer > vfxPool[i].rate)
 		{
@@ -58,18 +53,20 @@ void VfxUpdateAll(float dt) {
 				break;
 			}
 		}
-		//if (!vfxPool[i].active) break;
+
+		//Move and destroy if it goes offscreen
 		//vfxPool[i].pos = Vec2Add(vfxPool[i].pos, vfxPool[i].vel);
 		if (vfxPool[i].pos.x > 256 || vfxPool[i].pos.x < -16 || vfxPool[i].pos.y > 240 || vfxPool[i].pos.y < 0) {
 			VfxDestroy(i);
 		}
+		if (!vfxPool[i].active)
+			VfxDestroy(i);
 	}
 }
 
 void VfxDrawAll(void) {
 	for (int i = 0; i < activeCount; i++) {
 		Vfx* p = &vfxPool[i];
-		if (!p->active) break;
 
 		ImageDrawTile(p->pos.x, p->pos.y, TEX_ATLAS, p->frame);
 	}

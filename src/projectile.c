@@ -39,17 +39,10 @@ Projectile * ProjectileSpawn(Vec2 pos, Vec2 vel, unsigned int type, Faction f) {
 }
 
 void ProjectileDestroy(unsigned short i) {
-	if (i < activeCount && activeCount > 0) {
-		activeCount--;
-		projectiles[i] = projectiles[activeCount];
-		projectiles[activeCount].active = false;
-	}
-}
+	if (activeCount == 0) return; 
 
-void ProjectileKillIndex(int index) {
-	if (activeCount == 0) return;
 	activeCount--;
-	projectiles[index] = projectiles[activeCount];
+	projectiles[i] = projectiles[activeCount];
 	projectiles[activeCount].active = false;
 }
 
@@ -67,7 +60,7 @@ void ProjectileUpdateAll(float dt) {
 			break;
 		}
 		if (!projectiles[i].active)
-			EntityKillIndex(i);
+			ProjectileDestroy(i);
 	}
 }
 void ProjectileHandleAllCollisions(Entity* e_pool, int e_count) {

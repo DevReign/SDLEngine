@@ -98,20 +98,6 @@ unsigned int EntityGetActiveCount() {
 	return activeCount;
 }
 
-Entity* EntityCheckCollisionByRadius(Vec2 v, int r) {
-	for (int i = 0; i < activeCount; i++) {
-		unsigned char ent_r = entities[i].data->radius;
-		//TODO: use width and height later, but radius for now
-		float dx = (entities[i].pos.x + ent_r) - (v.x + r);
-		float dy = (entities[i].pos.y + ent_r) - (v.y + r);
-		float dist = dx*dx + dy*dy;
-		unsigned short radius = ent_r + r;
-		if ((dist) < (radius* radius))
-			return &entities[i];
-	}
-	return nullptr;
-}
-
 Entity* EntityGetById(int id) {
 	for (int i = 0; i < activeCount; i++) {
 		if (entities[i].id == id)
@@ -183,7 +169,7 @@ void EntityUpdateAll(float dt){
 		case TYPE_PICKUP: break;
 		}
 
-		//Get rid of it, if it's inactive
+		//Get rid of inactive
 		if (!e->active) EntityKillIndex(i);
 	}
 }
