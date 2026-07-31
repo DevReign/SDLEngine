@@ -3,8 +3,10 @@
 
 static unsigned int tileData[ARRAY_SIZE];
 static unsigned int objectData[ARRAY_SIZE];
-static bool solidTiles[NUM_TILES];
+static char solidTiles[NUM_TILES];
 static short chunkId = 0;
+static float sAnimTimer = 0.0f;
+static int sAnimOffset = 0;
 
 void LevelInit(const char* level) {
     SDL_memset(tileData, 0, ARRAY_SIZE);
@@ -14,11 +16,11 @@ void LevelInit(const char* level) {
     LevelSelectRoom(0);
 
     //load tile properties - from file later 
-    solidTiles[1] = true;
-    solidTiles[2] = true;
-    solidTiles[79] = true;
-    solidTiles[148] = true;
-    solidTiles[149] = true;
+    solidTiles[1] = TILE_FLAG_ANIM | TILE_FLAG_LOW;
+    solidTiles[2] = TILE_FLAG_ANIM | TILE_FLAG_LOW;
+    solidTiles[79] = TILE_FLAG_HIGH;
+    solidTiles[148] = TILE_FLAG_HIGH;
+    solidTiles[149] = TILE_FLAG_HIGH;
 }
 
 void LevelSave(const char* filename) {
@@ -79,18 +81,28 @@ short LevelFindAdjectId(short dir) {
     return 0;
 }
 
-void LevelDraw() {
+void LevelDraw(float dt) {
     unsigned  int i = 0;
     unsigned  int offset = chunkId * CHUNK_SIZE;
+
+    sAnimTimer += dt;
+    if (sAnimTimer > 0.60f){
+        sAnimTimer = 0.0f;
+        sAnimOffset++;
+        if (sAnimOffset > 1){
+            sAnimOffset = 0;
+        }
+    }
+
     for (unsigned int r = 0; r < CHUNK_HEIGHT;  r++){
         for (unsigned int c = 0; c < CHUNK_WIDTH; c++){
             i = tileData[r * CHUNK_WIDTH + c + offset];
-            ImageDrawTile(c * 16, r * 16, TEX_ATLAS, i);
+            ImageDrawTile(c * 16, r * 16, TEX_ATLAS, i + (sAnimOffset*!!(solidTiles[i] & TILE_FLAG_ANIM)));
         }
     }
 }
 
-bool LevelIsTileSolid(int x, int y) {
+char LevelIsTileSolid(int x, int y) {
     int c = x >> 4;
     int r = y >> 4;
     int local_id = r * CHUNK_WIDTH + c;

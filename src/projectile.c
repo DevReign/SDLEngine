@@ -67,8 +67,8 @@ void ProjectileHandleAllCollisions(Entity* e_pool, int e_count) {
 	Projectile* proj_pool = ProjectileGetPool();
 	for (short i = activeCount - 1; i >= 0; i--) {
 		Projectile* p = &proj_pool[i];
-
-		if (LevelIsTileSolid(p->pos.x + p->radius, p->pos.y + p->radius)) {
+		char tile_flags = LevelIsTileSolid(p->pos.x + p->radius, p->pos.y + p->radius);
+		if (tile_flags & TILE_FLAG_HIGH) {
 			VfxSpawn(p->pos, 512, 3);
 			AudioPlaySound(SND_HIT);
 			ProjectileDestroy(i);

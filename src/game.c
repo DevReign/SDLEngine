@@ -118,7 +118,7 @@ void GameDraw(void) {
 
     case STATE_GAMEPLAY:
 
-        LevelDraw();   // Layer 1 - Floors, Paths, Water
+        LevelDraw(ClockGetDeltaTime());   // Layer 1 - Floors, Paths, Water
         EntityDrawAll();          // Layer 2 - Player, Enemies, Items (Y-Sorted?)
         ProjectileDrawAll();
         VfxDrawAll();

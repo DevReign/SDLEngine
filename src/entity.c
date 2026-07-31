@@ -189,26 +189,27 @@ void EntityDrawAll() {
 void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 	int width = e->data->width;
 	int height = e->data->height;
+	char flags = (TILE_FLAG_LOW | TILE_FLAG_MID | TILE_FLAG_HIGH);
 
 	//X-axis
 	for (int i = 0; i < abs(vel.x); i++) {
 		int step_x = sign(vel.x);
 		int next_x = step_x + (int)e->pos.x;
 		int check_x = (step_x > 0) ? next_x + width : next_x;
-		bool ct = LevelIsTileSolid(check_x, e->pos.y);
-		bool cb = LevelIsTileSolid(check_x, e->bottom);
-		if (!ct && !cb) {
+		char ct = LevelIsTileSolid(check_x, e->pos.y);
+		char cb = LevelIsTileSolid(check_x, e->bottom);
+		if (!(ct & flags) && !(cb & flags)) {
 			e->pos.x += step_x;
 			e->right = e->pos.x + width;
 		}
 		else {
 			//Nudge player around tiles
-			if (!ct && cb) {
+			if (!(ct & flags) && (cb & flags)) {
 				e->pos.y -= 1;
 				e->bottom = (int)e->pos.y + height;
 				break;
 			}
-			else if (ct && !cb) {
+			else if ((ct & flags) && !(cb & flags)) {
 				e->pos.y += 1;
 				e->bottom = (int)e->pos.y + height;
 				break;
@@ -222,21 +223,20 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 		int step_y = sign(vel.y);
 		int next_y = step_y + (int)e->pos.y;
 		int check_y = (step_y > 0) ? next_y + height : next_y;
-		bool cl = LevelIsTileSolid(e->pos.x, check_y);
-		bool cr = LevelIsTileSolid(e->right, check_y);
-
-		if (!cl && !cr) {
+		char cl = LevelIsTileSolid(e->pos.x, check_y);
+		char cr = LevelIsTileSolid(e->right, check_y);
+		if (!(cl & flags) && !(cr & flags)) {
 			e->pos.y += step_y;
 			e->bottom = e->pos.y + height;
 		}
 		else {
 			//Nudge player around tiles
-			if (!cl && cr) {
+			if (!(cl & flags) && (cr & flags)) {
 				e->pos.x -= 1;
 				e->right = (int)e->pos.x + width;
 				break;
 			}
-			else if (cl && !cr) {
+			else if ((cl & flags) && !(cr & flags)) {
 				e->pos.x += 1;
 				e->right = (int)e->pos.x + width;
 				break;
