@@ -7,3 +7,8 @@ x64/
 SDLEngine/
 
 # Ignore all files with a specific extension
+
+#allow
+!SDL2/lib
+!SDL2/lib/*
+!*.dll
