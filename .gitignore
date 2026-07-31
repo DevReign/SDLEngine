@@ -7,4 +7,3 @@ x64/
 SDLEngine/
 
 # Ignore all files with a specific extension
-*.dll
