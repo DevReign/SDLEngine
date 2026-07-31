@@ -81,18 +81,11 @@ short LevelFindAdjectId(short dir) {
     return 0;
 }
 
-void LevelDraw(float dt) {
+void LevelDraw(void) {
     unsigned  int i = 0;
     unsigned  int offset = chunkId * CHUNK_SIZE;
 
-    sAnimTimer += dt;
-    if (sAnimTimer > 0.60f){
-        sAnimTimer = 0.0f;
-        sAnimOffset++;
-        if (sAnimOffset > 1){
-            sAnimOffset = 0;
-        }
-    }
+    
 
     for (unsigned int r = 0; r < CHUNK_HEIGHT;  r++){
         for (unsigned int c = 0; c < CHUNK_WIDTH; c++){
@@ -110,7 +103,7 @@ char LevelIsTileSolid(int x, int y) {
     return solidTiles[tileData[local_id + offset]];
 }
 
-short LevelGetTileId(int x, int y) {
+int LevelGetTileId(int x, int y) {
     int c = x >> 4;
     int r = y >> 4;
     int local_id = r * CHUNK_WIDTH + c;
@@ -118,3 +111,37 @@ short LevelGetTileId(int x, int y) {
     return tileData[local_id + offset];
 }
 
+void LevelSetTileId(int x, int y, int id) {
+    int c = x >> 4;
+    int r = y >> 4;
+    int local_id = r * CHUNK_WIDTH + c;
+    int offset = chunkId * CHUNK_SIZE;
+    tileData[local_id + offset] = id;
+}
+
+void LevelSetObjectId(int x, int y, int id) {
+    int c = x >> 4;
+    int r = y >> 4;
+    int local_id = r * CHUNK_WIDTH + c;
+    int offset = chunkId * CHUNK_SIZE;
+    objectData[local_id + offset] = id;
+}
+
+int LevelGetObjectId(int x, int y) {
+    int c = x >> 4;
+    int r = y >> 4;
+    int local_id = r * CHUNK_WIDTH + c;
+    int offset = chunkId * CHUNK_SIZE;
+    return objectData[local_id + offset];
+}
+
+void LevelUpdate(float dt) {
+    sAnimTimer += dt;
+    if (sAnimTimer > 0.60f) {
+        sAnimTimer = 0.0f;
+        sAnimOffset++;
+        if (sAnimOffset > NUM_ANIM_TILE_FRAMES) {
+            sAnimOffset = 0;
+        }
+    }
+}
