@@ -74,7 +74,7 @@ class Level:
         self.chunkObjects = self.entities[0 : self.chunkSize]
         self.file_path = Path("0.bin")
         self.chunkTilesCopy = self.tiles[0 : self.chunkSize]
-        self.chunkObjects = self.entities[0 : self.chunkSize]
+        self.chunkObjectsCopy = self.entities[0 : self.chunkSize]
         if self.file_path.is_file():
             print("The file exists.")
             self.Load('0.bin')
@@ -169,11 +169,13 @@ class Level:
         self.tiles.fill(5)
         self.entities.fill(0)
     def CopyChunk(self):
-        self.chunkTilesCopy = self.chunkTiles.copy()
-        self.chunkObjectsCopy = self.chunkObjects.copy()
+        for i in range(self.chunkSize):
+            self.chunkTilesCopy[i] = self.chunkTiles[i]
+            self.chunkObjectsCopy[i] = self.chunkObjects[i]
     def PasteChunk(self):
-        self.chunkTiles = self.chunkTilesCopy.copy()
-        self.chunkObjects = self.chunkObjectsCopy.copy()
+        for i in range(self.chunkSize):
+            self.chunkTiles[i] = self.chunkTilesCopy[i]
+            self.chunkObjects[i] = self.chunkObjectsCopy[i]
 
 class Selector:
     def __init__(self, selector_rect, atlas, tile_size=16, scale=2):
