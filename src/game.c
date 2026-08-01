@@ -49,6 +49,7 @@ void GameUpdate(void) {
 
     case STATE_GAMEPLAY: {
         // Update Game Objects (AI, Animations, Life Cycles)
+        LevelUpdate(dt);
         EntityUpdateAll(dt);
         ProjectileUpdateAll(dt);
         VfxUpdateAll(dt);
@@ -118,7 +119,7 @@ void GameDraw(void) {
 
     case STATE_GAMEPLAY:
 
-        LevelDraw(ClockGetDeltaTime());   // Layer 1 - Floors, Paths, Water
+        LevelDraw();   // Layer 1 - Floors, Paths, Water
         EntityDrawAll();          // Layer 2 - Player, Enemies, Items (Y-Sorted?)
         ProjectileDrawAll();
         VfxDrawAll();

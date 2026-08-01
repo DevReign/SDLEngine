@@ -42,6 +42,7 @@ class Window(object):
         self.window = pygame.display.set_mode(self.size)
         self.surface = pygame.Surface((w/self.scale,h/self.scale))
         self.deltatime = 0.0;
+        self.currentLevel = 0;
     def GetSurface(self):
         return self.surface
     def DrawTile(self, tiles, tile_index, position):
@@ -61,7 +62,7 @@ class Level:
         self.width = 8
         self.height = 8
         self.size = self.width* self.height 
-        self.currentLevel = 0
+        #self.currentLevel = 0
         self.chunkId = 0
         self.chunkWidth = 15
         self.chunkHeight = 9
@@ -72,12 +73,15 @@ class Level:
         self.chunkTiles = self.tiles[0 : self.chunkSize]
         self.chunkObjects = self.entities[0 : self.chunkSize]
         self.file_path = Path("0.bin")
+        self.chunkTilesCopy = self.tiles[0 : self.chunkSize]
+        self.chunkObjects = self.entities[0 : self.chunkSize]
         if self.file_path.is_file():
             print("The file exists.")
             self.Load('0.bin')
         else:
             print("The file does not exist.")
     def Save(self,path):
+        self.file_path = Path(path)
         # Force arrays to 32-bit integers to match C's int size
         tiles_raw = self.tiles.astype(np.int32).tobytes()
         entities_raw = self.entities.astype(np.int32).tobytes()
@@ -86,11 +90,19 @@ class Level:
             f.write(entities_raw)
         f.close()
     def Load(self, path):
-        # Read the entire flat binary stream of 32-bit ints
-        raw_data = np.fromfile(path, dtype=np.int32)
-        self.tiles = raw_data[0:self.chunkSize*self.size]
-        self.entities = raw_data[self.chunkSize*self.size:]#.reshape((9, 15))
-        self.SelectChunk(0)
+        self.file_path = Path(path)
+        if self.file_path.is_file():
+            # Read the entire flat binary stream of 32-bit ints
+            raw_data = np.fromfile(path, dtype=np.int32)
+            self.tiles = raw_data[0:self.chunkSize*self.size]
+            self.entities = raw_data[self.chunkSize*self.size:]#.reshape((9, 15))
+            self.SelectChunk(0)
+            return True
+        else:
+            print("The file does not exist.")
+            self.ClearLevel()
+            return False
+        
     def SetId(self, x,y, tile_id):
         self.chunkTiles[y*self.chunkWidth+x] = tile_id
     def GetId(self, x,y):
@@ -150,9 +162,18 @@ class Level:
                 if obj_id > 0:
                     DrawTile(surface, atlas, objs[obj_id], (pixel_x, pixel_y))
     def Clear(self):
-        for i in range(self.chunkSize):
-            self.chunkTiles[i]=5
-            self.chunkObjects[i]=0
+        #for i in range(self.chunkSize):
+        self.chunkTiles.fill(5)
+        self.chunkObjects.fill(0)
+    def ClearLevel(self):
+        self.tiles.fill(5)
+        self.entities.fill(0)
+    def CopyChunk(self):
+        self.chunkTilesCopy = self.chunkTiles.copy()
+        self.chunkObjectsCopy = self.chunkObjects.copy()
+    def PasteChunk(self):
+        self.chunkTiles = self.chunkTilesCopy.copy()
+        self.chunkObjects = self.chunkObjectsCopy.copy()
 
 class Selector:
     def __init__(self, selector_rect, atlas, tile_size=16, scale=2):
@@ -162,6 +183,7 @@ class Selector:
         self.atlas = atlas
         self.scaled_tile_size = tile_size * scale# 32x
         self.scrollY = 0
+        self.selectedTile=1
         # create data for now, load it in later
         self.objectCatalog={
             0: 0,   #dummy data/nothing
@@ -185,9 +207,12 @@ class Selector:
         selected_id = cc + (cr * columns)
         # Safety clamp against maximum available assets
         if active_layer == LAYER_TILE:
+            self.selectedTile = selected_id
             return selected_id % num_tiles
         else:
+            self.selectedObject = selected_id
             return selected_id % len(self.objectCatalog)
+
     def Draw(self, surface, atlas, active_layer):
         columns = 4
         rows = 8
@@ -200,14 +225,16 @@ class Selector:
                 # Calculate screen coordinates factoring in scroll
                 x = self.rect.x + (col * self.tileSize)
                 y = (row * self.tileSize) - self.scrollY
+
                 if y < 0:
                     continue
                 elif y >= self.rect.h:
                     break
 
-                tile_id = i
-                if tile_id < len(atlas):
-                    DrawTile(surface, atlas, tile_id, (x, y))
+                if i < len(atlas):
+                    DrawTile(surface, atlas, i, (x, y))
+                if self.selectedTile == i:
+                    pygame.draw.rect(surface,(255,0,0),(x, y,16, 16),1)
         else:
             for i in range(len(self.objectCatalog)):
                 col = i % columns
@@ -221,6 +248,8 @@ class Selector:
                     break
                 if i < len(self.objectCatalog):
                     DrawTile(surface, atlas, self.objectCatalog[i], (x, y))
+                if self.selectedTile == i:
+                    pygame.draw.rect(surface,(255,0,0),(x, y,16, 16),1)
 
 class Tool(object):
     def use(self, grid_x, grid_y, tile_id, room):
@@ -251,6 +280,8 @@ class LevelEditor:
         self.gridX, self.gridY = 0,0
         self.mouseX, self.mouseY = 0,0
         self.consoleLog = []
+        self.brushSize=1
+        self.currentLevel = 0
     def Log(self, msg):
         self.consoleLog.append(msg)
         if len(self.consoleLog) > 10:
@@ -300,11 +331,21 @@ class LevelEditor:
                     elif self.activeLayer == LAYER_OBJECT:
                         self.selectedObject = selected_id
                         self.Log(f"Selected Object ID: {selected_id}")
+            #mouse wheel to adjust brush size and tile selection
             elif event.type == pygame.MOUSEWHEEL:
-                if event.y > 0:
-                    self.selector.Scroll(128)
-                elif event.y < 0:
-                    self.selector.Scroll(-128)
+                if self.mouseX < self.rect.w and self.mouseY < self.rect.h:
+                    #change brush size if cursor is over map
+                    if event.y > 0:
+                        if self.brushSize < 6:
+                            self.brushSize+=1
+                    elif event.y < 0:
+                        if self.brushSize > 1:
+                            self.brushSize-=1
+                else:
+                    if event.y > 0:
+                        self.selector.Scroll(-128)
+                    elif event.y < 0:
+                        self.selector.Scroll(128)
             # Key pressese
             elif event.type == pygame.KEYDOWN:
                 current = self.level.chunkId
@@ -337,14 +378,15 @@ class LevelEditor:
                         self.activeLayer = LAYER_OBJECT
                     else:
                         self.activeLayer = LAYER_TILE
-                elif event.key == pygame.K_p:
-                    pass
+                
                 elif event.key == pygame.K_s:
-                    self.level.Save("0.bin")
-                    self.Log("Level saved as 0.bin")
+                    path = str(self.currentLevel)+".bin"
+                    self.level.Save(path)
+                    self.Log("Level saved as "+str(path))
                 elif event.key == pygame.K_l:
-                    self.level.Load("0.bin")
-                    self.Log("Loaded level 0.bin")
+                    path = str(self.currentLevel)+".bin"
+                    if self.level.Load(path):
+                        self.Log("Loaded level "+ path)
                 elif event.key == pygame.K_r:
                     #replace all
                     tid = self.level.GetId(self.gridX, self.gridY)
@@ -354,8 +396,23 @@ class LevelEditor:
                                 self.level.SetId(c, r, self.selectedTile)
                 elif event.key == pygame.K_z:
                     self.level.Clear()
+
+                elif event.key == pygame.K_c:
+                    self.level.CopyChunk()
+                elif event.key == pygame.K_v:
+                    self.level.PasteChunk()
+                elif event.key == pygame.K_PAGEUP:
+                    if self.currentLevel > 0:
+                        self.currentLevel -= 1
+                        path = str(self.currentLevel)+".bin"
+                        if self.level.Load(path):
+                            self.Log("Loaded level "+ path)
+                elif event.key == pygame.K_PAGEDOWN:
+                    self.currentLevel += 1
+                    path = "levels/"+str(self.currentLevel)+".bin"
+                    if self.level.Load(path):
+                        self.Log("Loaded level "+ path)
                         
-                    
     def Update(self):
         # Continuous inputs go here
         mouse_buttons = pygame.mouse.get_pressed()
@@ -365,6 +422,11 @@ class LevelEditor:
             if self.mouseX < self.rect.w and self.mouseY < self.rect.h:
                 if self.activeLayer == LAYER_TILE:
                     self.level.SetId(self.gridX, self.gridY, self.selectedTile)
+                    for y in range(self.brushSize):
+                        for x in range(self.brushSize):
+                            c = self.gridX + x
+                            r = self.gridY + y
+                            self.level.SetId(c, r, self.selectedTile)
                 else:
                     self.level.SetObjectId(self.gridX, self.gridY, self.selectedObject)
         if mouse_buttons[1]:
@@ -372,6 +434,7 @@ class LevelEditor:
     def Draw(self):
         self.level.Draw(self.canvas, self.atlas, self.selector.objectCatalog)
         self.selector.Draw(self.canvas, self.atlas, self.activeLayer)
+        pygame.draw.rect(self.canvas,(255,0,0),(self.gridX*self.tileSize, self.gridY*self.tileSize, self.brushSize*self.tileSize, self.brushSize*self.tileSize),1)
         self.window.Scale()
         for i in range(len(self.consoleLog)):
             self.window.Draw(font.render(self.consoleLog[i],True,(255,255,255)),(8,592+(i*12)))
