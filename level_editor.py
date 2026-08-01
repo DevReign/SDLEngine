@@ -72,12 +72,12 @@ class Level:
         self.entities = np.zeros((self.size*self.chunkSize), dtype=np.int32)
         self.chunkTiles = self.tiles[0 : self.chunkSize]
         self.chunkObjects = self.entities[0 : self.chunkSize]
-        self.file_path = Path("0.bin")
+        self.file_path = Path("levels/0.bin")
         self.chunkTilesCopy = self.tiles[0 : self.chunkSize]
         self.chunkObjectsCopy = self.entities[0 : self.chunkSize]
         if self.file_path.is_file():
             print("The file exists.")
-            self.Load('0.bin')
+            self.Load(self.file_path)
         else:
             print("The file does not exist.")
     def Save(self,path):
@@ -104,7 +104,8 @@ class Level:
             return False
         
     def SetId(self, x,y, tile_id):
-        self.chunkTiles[y*self.chunkWidth+x] = tile_id
+        if x >= 0 and x < self.chunkWidth and y < self.chunkHeight and y >= 0:
+            self.chunkTiles[y*self.chunkWidth+x] = tile_id
     def GetId(self, x,y):
         return self.chunkTiles[y*self.chunkWidth+x]
     def SetObjectId(self, x,y, tile_id):
@@ -284,6 +285,8 @@ class LevelEditor:
         self.consoleLog = []
         self.brushSize=1
         self.currentLevel = 0
+        self.levelDir="levels/"
+        self.fileExt =".bin"
     def Log(self, msg):
         self.consoleLog.append(msg)
         if len(self.consoleLog) > 10:
@@ -382,13 +385,13 @@ class LevelEditor:
                         self.activeLayer = LAYER_TILE
                 
                 elif event.key == pygame.K_s:
-                    path = str(self.currentLevel)+".bin"
+                    path = self.levelDir+str(self.currentLevel)+self.fileExt
                     self.level.Save(path)
-                    self.Log("Level saved as "+str(path))
+                    self.Log("Saved as- "+str(path))
                 elif event.key == pygame.K_l:
-                    path = str(self.currentLevel)+".bin"
+                    path = self.levelDir+str(self.currentLevel)+self.fileExt
                     if self.level.Load(path):
-                        self.Log("Loaded level "+ path)
+                        self.Log("Loaded file- "+ path)
                 elif event.key == pygame.K_r:
                     #replace all
                     tid = self.level.GetId(self.gridX, self.gridY)
@@ -406,14 +409,18 @@ class LevelEditor:
                 elif event.key == pygame.K_PAGEUP:
                     if self.currentLevel > 0:
                         self.currentLevel -= 1
-                        path = str(self.currentLevel)+".bin"
+                        path = self.levelDir+str(self.currentLevel)+self.fileExt
                         if self.level.Load(path):
-                            self.Log("Loaded level "+ path)
+                            self.Log("Loaded file- "+ path)
+                        else:
+                            self.Log("New file "+ path)
                 elif event.key == pygame.K_PAGEDOWN:
                     self.currentLevel += 1
-                    path = "levels/"+str(self.currentLevel)+".bin"
+                    path = self.levelDir+str(self.currentLevel)+self.fileExt
                     if self.level.Load(path):
-                        self.Log("Loaded level "+ path)
+                        self.Log("Loaded file- "+ path)
+                    else:
+                        self.Log("New file- "+ path)
                         
     def Update(self):
         # Continuous inputs go here
