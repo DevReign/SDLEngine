@@ -16,7 +16,8 @@
 #define LEVEL_SIZE LEVEL_HEIGHT*LEVEL_WIDTH
 #define ARRAY_SIZE CHUNK_SIZE*LEVEL_SIZE
 #define NUM_ANIM_TILE_FRAMES 2-1
-#define ANIM_TILE_RATE
+#define ANIM_TILE_RATE 0.30f
+
 typedef enum {
 	TILE_FLAG_GROUND = 0,
 	TILE_FLAG_LOW = 1, // pit or water collision
@@ -41,5 +42,5 @@ int LevelGetObjectId(int x, int y);
 void LevelUpdate(float dt);
 void LevelDraw(void);
 short LevelFindAdjectId(short dir);
-char LevelIsTileSolid(int x, int y);
+char LevelGetTileFlags(int x, int y);
 #endif

@@ -22,6 +22,7 @@ typedef enum {
     SND_HURT,
     SND_STEP,
     SND_PICKUP,
+    SND_BREAK,
     SND_COUNT
 } SoundID;
 

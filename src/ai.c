@@ -14,22 +14,27 @@ void AIChaseMelee(Entity* e, float dt) {
 		printf("Melee enemy died \n");
 		AudioPlaySound(SND_DEATH);
 	}
+	
+	if (!Vec2CheckRadiusOverlap(e->pos, 10,gPlayer->pos, 10)){
+		// direction vector (Difference = Target - Source)
+		/*Vec2 dir = Vec2Sub(gPlayer->pos, e->pos);
+		float dist = Vec2Length(dir);
+		e->vel.x = (dir.x/dist)* 2;
+		e->vel.y = (dir.y/dist)* 2;*/
 
-	if (!Vec2CheckRadiusOverlap(e->pos, 12,g_player->pos, 12)){
-		//move toward player
-		if (e->pos.x < g_player->pos.x - 16) {
+		if (e->pos.x < gPlayer->pos.x - 16) {
 			e->vel.x += 1;
 			e->facingDir = RIGHT;
 		}
-		else if (e->pos.x > g_player->pos.x + 16) {
+		else if (e->pos.x > gPlayer->pos.x + 16) {
 			e->vel.x -= 1;
 			e->facingDir = LEFT;
 		}
-		if (e->pos.y < g_player->pos.y - 16) {
+		if (e->pos.y < gPlayer->pos.y - 16) {
 			e->vel.y += 1;
 			e->facingDir = DOWN;
 		}
-		else if (e->pos.y > g_player->pos.y + 16) {
+		else if (e->pos.y > gPlayer->pos.y + 16) {
 			e->vel.y -= 1;
 			e->facingDir = UP;
 		}
@@ -38,15 +43,17 @@ void AIChaseMelee(Entity* e, float dt) {
 
 	//attack player
 	if (e->attackTimer <= 0) {
-		if (Vec2CheckRadiusOverlap(e->pos, 12, g_player->pos, 12)) {
+		if (Vec2CheckRadiusOverlap(e->pos, 12, gPlayer->pos, 12)) {
+			e->vel.x = 0.0f;
+			e->vel.y = 0.0f;
 			e->attackTimer = 0.80f;// e->data->attackSpeed;
-			g_player->health -= 10;
-			g_player->knockbackDir = e->facingDir;
-			g_player->hurtFrames = 12;
-			VfxSpawn(g_player->pos, 0, 1);
-			if (g_player->health < 1) {
-				g_player->frame = 286;
-				g_player->playingAnim = false;
+			gPlayer->health -= 10;
+			gPlayer->knockbackDir = e->facingDir;
+			gPlayer->hurtFrames = 12;
+			VfxSpawn(gPlayer->pos, 0, 1);
+			if (gPlayer->health < 1) {
+				gPlayer->frame = 286;
+				gPlayer->playingAnim = false;
 				AudioPlaySound(SND_DEATH);
 			}
 			else {

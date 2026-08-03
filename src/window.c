@@ -3,7 +3,7 @@
 //static unsigned char state = 0;
 static unsigned short windowWidth = 640;
 static unsigned short windowHeight = 360;
-static int scale = 3;
+static int sScale = 3;
 static SDL_Window* window = nullptr;
 static SDL_Renderer* renderer = nullptr;
 static SDL_Event event;
@@ -29,11 +29,12 @@ void WindowQuitMainLoop(){
 	running = false;
 }
 
-void WindowInitialize(unsigned short w, unsigned short h, const char * title){
+void WindowInitialize(unsigned short w, unsigned short h, const char * title, int scale){
 	bool success = true;
 	running = true;
 	window = nullptr;
 	renderer = nullptr;
+	sScale = scale;
 
 	//Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0){
@@ -73,7 +74,7 @@ void WindowInitialize(unsigned short w, unsigned short h, const char * title){
 		}
 		//SDL_Texture* canvas = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_RENDERER_TARGETTEXTURE);
 		SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-		SDL_RenderSetLogicalSize(renderer, (int)(w / scale), (int)(h / scale));//SDL_RenderSetScale(renderer, scale, scale);
+		SDL_RenderSetLogicalSize(renderer, (int)(w / sScale), (int)(h / sScale));//SDL_RenderSetScale(renderer, sScale, sScale);
 		//Mix_Init(MIX_INIT_OGG)
 	}
 }
@@ -110,4 +111,6 @@ SDL_Renderer* WindowGetRenderer()
 	return renderer;
 }
 
-
+unsigned char WindowGetScale() {
+	return sScale;
+}

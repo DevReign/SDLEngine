@@ -14,6 +14,7 @@ void DatabaseLoadAssets(void) {
     AudioLoadSound("audio/mpain.wav", SND_HURT);
     AudioLoadSound("audio/step.wav", SND_STEP);
     AudioLoadSound("audio/pickup.wav",SND_PICKUP);
+    AudioLoadSound("audio/break.wav", SND_BREAK);
 
     // Configure
     AudioSetVolume(10);

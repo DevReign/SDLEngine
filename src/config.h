@@ -11,7 +11,7 @@
 #define MAX_TILESHEETS 4
 #define MAX_SOUNDS 8
 #define TILE_SIZE 16
-#define NUM_TILES 256
+#define NUM_TILES 1024
 
 //typedef signed char int8;
 //typedef signed short int16;

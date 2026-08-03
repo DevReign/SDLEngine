@@ -9,7 +9,6 @@ void ImageInit(SDL_Renderer* r)
 	{
 		tiles[i].texture = nullptr;
 	}
-
 	renderer = r;
 }
 

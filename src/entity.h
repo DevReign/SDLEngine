@@ -20,7 +20,7 @@ typedef struct{
 	float attackTimer, animTimer;// knockbackTimer, hurtTimer, flinchTimer;
 } Entity;
 
-extern Entity* g_player;
+extern Entity* gPlayer;
 
 Entity* EntityGetPool(void);
 void EntityManagerInit();

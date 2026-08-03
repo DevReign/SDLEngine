@@ -12,27 +12,32 @@ This is the standalone map editor for the game engine, used to create and manage
 | **Scroll / View More Tiles** - Scroll Wheel |
 | **Save Level Data** - `S` Key |
 | **Load Level Data** - `L` Key |
+| **Change Level up** - `Page up` Key |
+| **Change Level down** - `Page down` Key |
+| **Replace all of that tile** - `R` Key |
+| **Copy chunk** - `C` Key |
+| **Paste chunk** - `V` Key |
 
 ### Requirements
 requires pygame and python 3.11
 
 # Game Engine
-A 2d game engine built in C with a map editor made in python
+A 2d retro game engine built in C/C++ with a map editor made in python
 
 ## Features
 * **Room-Based Entity System:** Dynamically stores and manages entities within specific game rooms.
 * **Custom Map Editor:** Tooling built to design and export world layouts.
 
 ## Prerequisites & Building
-To compile and run this project, you must have **SDL2** installed and properly linked in your compiler settings.
+To compile and run this project, you must have **SDL2** installed and properly linked in your compiler settings. It's configured to run using sdl2 in the project directory.
 
 ### Setup & Dependencies
-IDE: Visual Studio 2022
-Graphics/Input Library: SDL2 / SDL_image
+IDE: Visual Studio 2017
+Library: SDL2 / SDL_image / SDL_Mixer
 
 *Note: This project links to external SDL2 directories. To compile on a different machine, please update the Visual Studio Project Properties Include Directories and Linker Additional Dependencies to point to your local SDL2 installation path.
 
 Instructions can be found here: https://lazyfoo.net/tutorials/SDL/01_hello_SDL/index.php *
 
 ### Author
-Robert(Tony) Minniti
+Robert(Tony) Minniti Jr

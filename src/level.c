@@ -3,7 +3,7 @@
 
 static unsigned int tileData[ARRAY_SIZE];
 static unsigned int objectData[ARRAY_SIZE];
-static char solidTiles[NUM_TILES];
+static char sTileFlags[NUM_TILES];
 static short chunkId = 0;
 static float sAnimTimer = 0.0f;
 static int sAnimOffset = 0;
@@ -11,16 +11,20 @@ static int sAnimOffset = 0;
 void LevelInit(const char* level) {
     SDL_memset(tileData, 0, ARRAY_SIZE);
     SDL_memset(objectData, 0, ARRAY_SIZE);
-    SDL_memset(solidTiles, 0, NUM_TILES);
+    SDL_memset(sTileFlags, 0, NUM_TILES);
     LevelLoad(level);
     LevelSelectRoom(0);
 
     //load tile properties - from file later 
-    solidTiles[1] = TILE_FLAG_ANIM | TILE_FLAG_LOW;
-    solidTiles[2] = TILE_FLAG_ANIM | TILE_FLAG_LOW;
-    solidTiles[79] = TILE_FLAG_HIGH;
-    solidTiles[148] = TILE_FLAG_HIGH;
-    solidTiles[149] = TILE_FLAG_HIGH;
+    sTileFlags[1] = TILE_FLAG_ANIM | TILE_FLAG_LOW;
+    sTileFlags[2] = TILE_FLAG_ANIM | TILE_FLAG_LOW;
+    sTileFlags[79] = TILE_FLAG_HIGH;
+    sTileFlags[148] = TILE_FLAG_HIGH;
+    sTileFlags[149] = TILE_FLAG_HIGH;
+    sTileFlags[178] = TILE_FLAG_MID;
+    sTileFlags[216] = TILE_FLAG_ANIM | TILE_FLAG_MID;
+    sTileFlags[529] = TILE_FLAG_HIGH | TILE_FLAG_BREAKABLE;
+
 }
 
 void LevelSave(const char* filename) {
@@ -90,17 +94,17 @@ void LevelDraw(void) {
     for (unsigned int r = 0; r < CHUNK_HEIGHT;  r++){
         for (unsigned int c = 0; c < CHUNK_WIDTH; c++){
             i = tileData[r * CHUNK_WIDTH + c + offset];
-            ImageDrawTile(c * 16, r * 16, TEX_ATLAS, i + (sAnimOffset*!!(solidTiles[i] & TILE_FLAG_ANIM)));
+            ImageDrawTile(c * 16, r * 16, TEX_ATLAS, i + (sAnimOffset*!!(sTileFlags[i] & TILE_FLAG_ANIM)));
         }
     }
 }
 
-char LevelIsTileSolid(int x, int y) {
+char LevelGetTileFlags(int x, int y) {
     int c = x >> 4;
     int r = y >> 4;
     int local_id = r * CHUNK_WIDTH + c;
     int offset = chunkId * CHUNK_SIZE;
-    return solidTiles[tileData[local_id + offset]];
+    return sTileFlags[tileData[local_id + offset]];
 }
 
 int LevelGetTileId(int x, int y) {
@@ -137,7 +141,7 @@ int LevelGetObjectId(int x, int y) {
 
 void LevelUpdate(float dt) {
     sAnimTimer += dt;
-    if (sAnimTimer > 0.60f) {
+    if (sAnimTimer > ANIM_TILE_RATE) {
         sAnimTimer = 0.0f;
         sAnimOffset++;
         if (sAnimOffset > NUM_ANIM_TILE_FRAMES) {

@@ -15,7 +15,7 @@ typedef struct {
 } PlayerProgress;
 
 // Global Access to Player State
-extern PlayerProgress g_playerProgress;
+extern PlayerProgress gPlayerProgress;
 
 // Execution Control Loops called by game.c
 void PlayerInit(int gridX, int gridY);

@@ -4,7 +4,7 @@
 int main(int argc, char* args[])
 {
 	//Init engine and game
-	EngineInit("Game", 960, 540);//(320, 180 - 640, 360,
+	EngineInit("Game", 1280, 720);// maybe 320, 180 or 640, 360 -  960, 540?
 	GameInit(); 
 	
 	//--------------------------------------------------------

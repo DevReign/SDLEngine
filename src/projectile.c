@@ -67,10 +67,22 @@ void ProjectileHandleAllCollisions(Entity* e_pool, int e_count) {
 	Projectile* proj_pool = ProjectileGetPool();
 	for (short i = activeCount - 1; i >= 0; i--) {
 		Projectile* p = &proj_pool[i];
-		char tile_flags = LevelIsTileSolid(p->pos.x + p->radius, p->pos.y + p->radius);
-		if (tile_flags & TILE_FLAG_HIGH) {
+		char tile_flags = LevelGetTileFlags(p->pos.x + p->radius, p->pos.y + p->radius);
+		if (tile_flags & (TILE_FLAG_HIGH | TILE_FLAG_MID)) {
 			VfxSpawn(p->pos, 512, 3);
-			AudioPlaySound(SND_HIT);
+			
+			//break tile if we hit it
+			if (tile_flags & TILE_FLAG_BREAKABLE) {
+				int tx, ty;
+				tx = (int)(p->pos.x + p->radius);
+				ty = (int)(p->pos.y + p->radius);
+				LevelSetTileId(tx, ty, 68);
+				VfxSpawn(p->pos, 512, 3);// TODO- needs to be on tile position tx,ty should work after >> 4
+				AudioPlaySound(SND_BREAK);
+			}
+			else {
+				AudioPlaySound(SND_PICKUP);
+			}
 			ProjectileDestroy(i);
 		}
 		for (int j = 0; j < EntityGetActiveCount(); j++) {

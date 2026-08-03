@@ -6,13 +6,13 @@
 static Entity entities[MAX_ENTITIES] = { 0 };//static Entity *entityPool[64] = { 0 };
 static unsigned short entityCount = 0; //tracks unique ids
 static unsigned short activeCount = 0;
-Entity* g_player = NULL;
+Entity* gPlayer = NULL;
 extern struct EntityBlueprint entityDatabase[ENT_COUNT];
 static float levelChangeTimer = 0.0f;
 
 void EntityManagerInit() {
 	entityCount = 0;
-	g_player = NULL;
+	gPlayer = NULL;
 	SDL_memset(entities, 0, activeCount);
 	//spawn player here?
 }
@@ -47,6 +47,8 @@ Entity* EntitySpawn(int x, int y, unsigned int eid) {
 		ent->animTimer = 0.14f;
 		ent->active = true;
 		ent->playingAnim = true;
+		ent->right = ent->pos.x + ent->data->width;
+		ent->bottom = ent->pos.y + ent->data->height;
 		activeCount++;
 		return ent;
 	}
@@ -196,8 +198,8 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 		int step_x = sign(vel.x);
 		int next_x = step_x + (int)e->pos.x;
 		int check_x = (step_x > 0) ? next_x + width : next_x;
-		char ct = LevelIsTileSolid(check_x, e->pos.y);
-		char cb = LevelIsTileSolid(check_x, e->bottom);
+		char ct = LevelGetTileFlags(check_x, e->pos.y);
+		char cb = LevelGetTileFlags(check_x, e->bottom);
 		if (!(ct & flags) && !(cb & flags)) {
 			e->pos.x += step_x;
 			e->right = e->pos.x + width;
@@ -217,14 +219,15 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 			break;
 		}
 	}
-
+	e->vel.x = 0;
+	
 	// Y-axis
 	for (int i = 0; i < abs(vel.y); i++) {
 		int step_y = sign(vel.y);
 		int next_y = step_y + (int)e->pos.y;
 		int check_y = (step_y > 0) ? next_y + height : next_y;
-		char cl = LevelIsTileSolid(e->pos.x, check_y);
-		char cr = LevelIsTileSolid(e->right, check_y);
+		char cl = LevelGetTileFlags(e->pos.x, check_y);
+		char cr = LevelGetTileFlags(e->right, check_y);
 		if (!(cl & flags) && !(cr & flags)) {
 			e->pos.y += step_y;
 			e->bottom = e->pos.y + height;
@@ -244,9 +247,10 @@ void EntityMoveWithCollision(Entity* e, Vec2 vel) {
 			break;
 		}
 	}
+	e->vel.y = 0;
 }
 void EntityHandleAllCollisions(void){
-	Entity* player = g_player;
+	Entity* player = gPlayer;
 	//Check collision for entities 
 	for (char i = activeCount - 1; i >= 0; i--) {
 		Entity* a = &entities[i];
@@ -255,14 +259,14 @@ void EntityHandleAllCollisions(void){
 
 			//check for collision
 			if (Vec2CheckRadiusOverlap(a->pos, 8, b->pos, 8)) {
-				if (a->eType == TYPE_PICKUP && b == g_player) {
+				if (a->eType == TYPE_PICKUP && b == gPlayer) {
 					AudioPlaySound(SND_PICKUP);
 					if (b->health < b->data->maxHealth)
 						b->health += 15;
 					EntityKillIndex(i);
 					continue;
 				}
-				else if (a->eType == TYPE_SYSTEM && b == g_player) {
+				else if (a->eType == TYPE_SYSTEM && b == gPlayer) {
 					if (levelChangeTimer > 0)
 						continue;
 					if (a->eId == ENT_STAIRS_DOWN) {
