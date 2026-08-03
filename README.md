@@ -1,6 +1,6 @@
-# Map Editor
+# Level Editor
 
-This is the standalone map editor for the game engine, used to create and manage room-based level data. 
+This is the standalone level editor for the game engine, used to create and manage room-based level data. 
 
 ## Controls
 
@@ -22,11 +22,11 @@ This is the standalone map editor for the game engine, used to create and manage
 requires pygame and python 3.11
 
 # Game Engine
-A 2d retro game engine built in C/C++ with a map editor made in python
+A 2d retro game engine built in C/C++ using the level editor made in python. You can move with ASDW and fire with space.
 
 ## Features
 * **Room-Based Entity System:** Dynamically stores and manages entities within specific game rooms.
-* **Custom Map Editor:** Tooling built to design and export world layouts.
+* **Custom Level Editor:** Tooling built to design and export world layouts.
 
 ## Prerequisites & Building
 To compile and run this project, you must have **SDL2** installed and properly linked in your compiler settings. It's configured to run using sdl2 in the project directory.
